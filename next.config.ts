@@ -4,9 +4,7 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['localhost', 'hekaya-ai.com']
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client']
-  }
+  serverExternalPackages: ['@prisma/client']
 };
 
 export default nextConfig;

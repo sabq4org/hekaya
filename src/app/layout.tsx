@@ -1,13 +1,9 @@
-"use client"
-
 import type { Metadata } from "next";
 import { Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { AuthProvider } from "@/components/providers/session-provider";
+import { LayoutContent } from "@/components/layout-content";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { usePathname } from "next/navigation";
+import { AuthProvider } from "@/components/providers/session-provider";
 
 const notoSansArabic = Noto_Sans_Arabic({
   subsets: ["arabic"],
@@ -16,25 +12,30 @@ const notoSansArabic = Noto_Sans_Arabic({
   display: "swap",
 });
 
-// Note: metadata export is not supported in client components
-// This will be handled by individual pages
-
-function LayoutContent({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isAdminRoute = pathname?.startsWith('/admin');
-
-  if (isAdminRoute) {
-    return <>{children}</>;
-  }
-
-  return (
-    <div className="relative flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </div>
-  );
-}
+export const metadata: Metadata = {
+  title: {
+    default: "حكاية AI - منصة المحتوى العربي للذكاء الاصطناعي",
+    template: "%s | حكاية AI"
+  },
+  description: "حيث يلتقي الخيال بالعلم، وتتحول الخوارزميات إلى حكايات تلهم وتعلّم",
+  keywords: ["الذكاء الاصطناعي", "تعلم الآلة", "التقنية", "الابتكار", "البرمجة"],
+  authors: [{ name: "فريق حكاية AI" }],
+  creator: "حكاية AI",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://hekaya-ai.com'),
+  openGraph: {
+    type: "website",
+    locale: "ar_SA",
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://hekaya-ai.com',
+    siteName: "حكاية AI",
+    title: "حكاية AI - منصة المحتوى العربي للذكاء الاصطناعي",
+    description: "حيث يلتقي الخيال بالعلم، وتتحول الخوارزميات إلى حكايات تلهم وتعلّم",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "حكاية AI - منصة المحتوى العربي للذكاء الاصطناعي",
+    description: "حيث يلتقي الخيال بالعلم، وتتحول الخوارزميات إلى حكايات تلهم وتعلّم",
+  },
+};
 
 export default function RootLayout({
   children,
