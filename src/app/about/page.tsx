@@ -51,7 +51,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
               <CardContent className="p-6 text-center">
-                <div className="p-4 rounded-full mx-auto mb-4 w-fit" className="bg-gray-100 dark:bg-gray-700">
+                <div className="p-4 rounded-full mx-auto mb-4 w-fit bg-gray-100 dark:bg-gray-700">
                   <Target className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h3 className="text-lg font-bold mb-3 dark:text-gray-100">مهمتنا</h3>
@@ -63,7 +63,7 @@ export default function AboutPage() {
             
             <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
               <CardContent className="p-6 text-center">
-                <div className="p-4 rounded-full mx-auto mb-4 w-fit" className="bg-gray-100 dark:bg-gray-700">
+                <div className="p-4 rounded-full mx-auto mb-4 w-fit bg-gray-100 dark:bg-gray-700">
                   <Users className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                 </div>
                 <h3 className="text-lg font-bold mb-3 dark:text-gray-100">مجتمعنا</h3>
@@ -75,7 +75,7 @@ export default function AboutPage() {
             
             <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
               <CardContent className="p-6 text-center">
-                <div className="p-4 rounded-full mx-auto mb-4 w-fit" className="bg-gray-100 dark:bg-gray-700">
+                <div className="p-4 rounded-full mx-auto mb-4 w-fit bg-gray-100 dark:bg-gray-700">
                   <BookOpen className="w-8 h-8 text-pink-600 dark:text-pink-400" />
                 </div>
                 <h3 className="text-lg font-bold mb-3 dark:text-gray-100">محتوانا</h3>

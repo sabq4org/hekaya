@@ -120,7 +120,7 @@ export default function MedicalAIDiagnosisArticle() {
               <div className="prose prose-lg max-w-none">
                 
                 {/* Summary Box */}
-                <div className="p-6 mb-8" className="bg-gray-50 dark:bg-gray-900" style={{ borderRight: '4px solid #8b5cf6', borderRadius: '8px' }}>
+                <div className="p-6 mb-8 bg-gray-50 dark:bg-gray-900" style={{ borderRight: '4px solid #8b5cf6', borderRadius: '8px' }}>
                   <p className="font-bold text-purple-600 dark:text-purple-400 mb-3">ملخص المقال</p>
                   <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 يستكشف هذا المقال كيف يحدث الذكاء الاصطناعي ثورة حقيقية في مجال التشخيص الطبي، من خلال تحقيق دقة تشخيصية تصل إلى 97% في بعض التطبيقات، وتمكين الكشف المبكر عن الأمراض قبل ظهور الأعراض. نناقش التطبيقات العملية في مختلف التخصصات الطبية، والتحديات المواجهة، ونستشرف مستقبل الطب الرقمي.
@@ -291,7 +291,7 @@ export default function MedicalAIDiagnosisArticle() {
 
                 <div className="mt-12 p-6 text-center" style={{ backgroundColor: '#f0f0ef', borderRadius: '12px' }}>
                   <p className="text-lg font-medium text-gray-800">
-                    "الذكاء الاصطناعي لن يحل محل الأطباء، ولكن الأطباء الذين يستخدمون الذكاء الاصطناعي سيحلون محل أولئك الذين لا يستخدمونه"
+                    &quot;الذكاء الاصطناعي لن يحل محل الأطباء، ولكن الأطباء الذين يستخدمون الذكاء الاصطناعي سيحلون محل أولئك الذين لا يستخدمونه&quot;
                   </p>
                   <p className="text-sm text-gray-600 mt-2">- د. إريك توبول، خبير الطب الرقمي</p>
                 </div>

@@ -147,9 +147,11 @@ export function BreadcrumbStructuredData({ items }: BreadcrumbStructuredDataProp
   )
 }
 
-interface OrganizationStructuredDataProps {}
+interface OrganizationStructuredDataProps {
+  // يمكن إضافة خصائص مستقبلية هنا
+}
 
-export function OrganizationStructuredData({}: OrganizationStructuredDataProps) {
+export function OrganizationStructuredData(_props: OrganizationStructuredDataProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hekaya-ai.com'
   
   const structuredData = {

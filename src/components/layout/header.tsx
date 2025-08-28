@@ -104,7 +104,7 @@ export function Header() {
             {/* Login/Subscribe Button */}
             <Button 
               variant="outline"
-              className="hidden md:flex items-center gap-2"
+              className="hidden md:flex items-center gap-2 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
               style={{ 
                 borderColor: isDark ? '#333' : '#f0f0ef',
                 borderWidth: '1px',
@@ -112,7 +112,6 @@ export function Header() {
                 backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
                 boxShadow: 'none'
               }}
-              className="dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               <span className="text-sm">ابدأ الكتابة</span>
             </Button>
@@ -157,7 +156,7 @@ export function Header() {
               <div className="px-4 pt-4" style={{ borderTop: isDark ? '1px solid #333' : '1px solid #f0f0ef' }}>
                 <Button 
                   variant="outline" 
-                  className="w-full"
+                  className="w-full dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   style={{ 
                     borderColor: isDark ? '#333' : '#f0f0ef',
                     borderWidth: '1px',
@@ -165,7 +164,6 @@ export function Header() {
                     backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
                     boxShadow: 'none'
                   }}
-                  className="dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <span className="text-sm">ابدأ الكتابة</span>
                 </Button>

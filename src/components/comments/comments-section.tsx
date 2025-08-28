@@ -41,7 +41,13 @@ const mockComments = [
 ]
 
 interface CommentProps {
-  comment: any
+  comment: {
+    id: string
+    content: string
+    author: { name: string }
+    createdAt: Date
+    replies?: CommentProps['comment'][]
+  }
   onReply: (commentId: string, content: string) => void
 }
 
@@ -100,7 +106,7 @@ function Comment({ comment, onReply }: CommentProps) {
 
         {comment.replies && comment.replies.length > 0 && (
           <div className="mt-4 space-y-4 border-r-2 border-gray-200 pr-4">
-            {comment.replies.map((reply: any) => (
+            {comment.replies.map((reply) => (
               <Comment key={reply.id} comment={reply} onReply={onReply} />
             ))}
           </div>
