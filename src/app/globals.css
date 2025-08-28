@@ -7,24 +7,24 @@
   --card-foreground: 17 24 39;
   --popover: 255 255 255;
   --popover-foreground: 17 24 39;
-  --primary: 37 99 235;
+  --primary: 99 102 241; /* Indigo-500 */
   --primary-foreground: 248 250 252;
   --secondary: 243 244 246;
   --secondary-foreground: 17 24 39;
   --muted: 243 244 246;
   --muted-foreground: 107 114 128;
-  --accent: 243 244 246;
-  --accent-foreground: 17 24 39;
+  --accent: 139 92 246; /* Purple-500 */
+  --accent-foreground: 248 250 252;
   --destructive: 239 68 68;
   --destructive-foreground: 248 250 252;
   --border: 229 231 235;
   --input: 229 231 235;
-  --ring: 37 99 235;
-  --chart-1: 37 99 235;
-  --chart-2: 16 185 129;
-  --chart-3: 245 158 11;
-  --chart-4: 239 68 68;
-  --chart-5: 139 92 246;
+  --ring: 99 102 241;
+  --chart-1: 99 102 241; /* Indigo */
+  --chart-2: 16 185 129; /* Emerald */
+  --chart-3: 139 92 246; /* Purple */
+  --chart-4: 239 68 68; /* Red */
+  --chart-5: 59 130 246; /* Blue */
   --radius: 0.5rem;
 }
 
