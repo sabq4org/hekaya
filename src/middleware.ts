@@ -9,10 +9,13 @@ export function middleware(request: NextRequest) {
       return NextResponse.next()
     }
 
-    // Check for auth token in cookies
-    const token = request.cookies.get('auth-token')
-    
-    if (!token) {
+    // Check for either our simple demo token OR NextAuth secure session token
+    const demoAuthToken = request.cookies.get('auth-token')
+    const nextAuthToken =
+      request.cookies.get('__Secure-next-auth.session-token') ||
+      request.cookies.get('next-auth.session-token')
+
+    if (!demoAuthToken && !nextAuthToken) {
       // Redirect to login if no token
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
