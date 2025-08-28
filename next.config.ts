@@ -1,10 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // output: 'export', // Disabled for development with middleware
-  // trailingSlash: true,
+  // Enable standalone output for better performance
+  output: 'standalone',
   images: {
-    unoptimized: true
+    unoptimized: false, // Enable image optimization on Vercel
+    domains: ['hekaya-ai.com', 'localhost']
+  },
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client']
   }
 };
 

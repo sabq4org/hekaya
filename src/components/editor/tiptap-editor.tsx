@@ -364,7 +364,7 @@ export default function TiptapEditor({
       {/* Status Bar */}
       <div className="border-t border-gray-300 px-4 py-2 text-sm text-gray-600 flex justify-between">
         <div>
-          عدد الأحرف: {editor.getCharacterCount()}
+          عدد الأحرف: {editor.storage.characterCount?.characters() || editor.getText().length}
         </div>
         <div>
           عدد الكلمات: {editor.getText().split(' ').filter(word => word.length > 0).length}

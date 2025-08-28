@@ -6,17 +6,22 @@ import { authOptions } from '@/lib/auth'
 // GET /api/posts/[id] - جلب مقال واحد
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const post = await prisma.post.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         author: {
           select: { id: true, name: true, email: true, bio: true }
         },
-        category: true,
-        tags: true,
+        section: true,
+        tags: {
+          include: {
+            tag: true
+          }
+        },
         comments: {
           include: {
             author: {
@@ -40,7 +45,7 @@ export async function GET(
 
     // زيادة عدد المشاهدات
     await prisma.post.update({
-      where: { id: params.id },
+      where: { id },
       data: { views: { increment: 1 } }
     })
 
@@ -57,9 +62,10 @@ export async function GET(
 // PUT /api/posts/[id] - تحديث مقال
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
@@ -73,20 +79,18 @@ export async function PUT(
     const {
       title,
       slug,
-      excerpt,
+      summary,
       content,
       status,
-      categoryId,
+      sectionId,
       tagIds = [],
-      featuredImage,
-      metaTitle,
-      metaDescription,
+      coverImage,
       publishedAt
     } = body
 
     // التحقق من وجود المقال
     const existingPost = await prisma.post.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingPost) {
@@ -119,36 +123,55 @@ export async function PUT(
     }
 
     // تحديث المقال
-    const updatedPost = await prisma.post.update({
-      where: { id: params.id },
+    await prisma.post.update({
+      where: { id },
       data: {
         title,
         slug,
-        excerpt,
+        summary,
         content,
         status,
-        featuredImage,
-        metaTitle: metaTitle || title,
-        metaDescription: metaDescription || excerpt,
-        publishedAt: status === 'published' && !existingPost.publishedAt 
+        coverImage,
+        publishedAt: status === 'PUBLISHED' && !existingPost.publishedAt 
           ? publishedAt || new Date() 
           : existingPost.publishedAt,
-        categoryId,
-        tags: {
-          set: [], // إزالة جميع الوسوم الحالية
-          connect: tagIds.map((id: string) => ({ id })) // إضافة الوسوم الجديدة
-        }
-      },
+        sectionId
+      }
+    })
+
+    // إزالة الوسوم الحالية
+    await prisma.postTag.deleteMany({
+      where: { postId: id }
+    })
+
+    // إضافة الوسوم الجديدة
+    if (tagIds.length > 0) {
+      await prisma.postTag.createMany({
+        data: tagIds.map((tagId: string) => ({
+          postId: id,
+          tagId
+        })),
+        skipDuplicates: true
+      })
+    }
+
+    // جلب المقال المحدث مع العلاقات
+    const finalPost = await prisma.post.findUnique({
+      where: { id },
       include: {
         author: {
           select: { id: true, name: true, email: true }
         },
-        category: true,
-        tags: true
+        section: true,
+        tags: {
+          include: {
+            tag: true
+          }
+        }
       }
     })
 
-    return NextResponse.json(updatedPost)
+    return NextResponse.json(finalPost)
   } catch (error) {
     console.error('Error updating post:', error)
     return NextResponse.json(
@@ -161,9 +184,10 @@ export async function PUT(
 // DELETE /api/posts/[id] - حذف مقال
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
@@ -175,7 +199,7 @@ export async function DELETE(
 
     // التحقق من وجود المقال
     const existingPost = await prisma.post.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingPost) {
@@ -195,7 +219,7 @@ export async function DELETE(
 
     // حذف المقال
     await prisma.post.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'تم حذف المقال بنجاح' })

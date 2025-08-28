@@ -5,12 +5,12 @@ export async function GET() {
   try {
     // جلب آخر 20 مقال منشور
     const posts = await prisma.post.findMany({
-      where: { status: 'published' },
+      where: { status: 'PUBLISHED' },
       include: {
         author: {
           select: { name: true, email: true }
         },
-        category: {
+        section: {
           select: { name: true }
         }
       },
@@ -42,7 +42,7 @@ export async function GET() {
     
     ${posts.map(post => {
       const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : new Date(post.createdAt).toUTCString()
-      const excerpt = post.excerpt || post.content.replace(/<[^>]*>/g, '').substring(0, 200) + '...'
+      const excerpt = post.summary || post.content.replace(/<[^>]*>/g, '').substring(0, 200) + '...'
       
       return `
     <item>
@@ -53,8 +53,8 @@ export async function GET() {
       <guid isPermaLink="true">${baseUrl}/articles/${post.slug}</guid>
       <pubDate>${pubDate}</pubDate>
       <author>${post.author.email} (${post.author.name})</author>
-      <category><![CDATA[${post.category?.name || 'عام'}]]></category>
-      ${post.featuredImage ? `<enclosure url="${post.featuredImage}" type="image/jpeg" />` : ''}
+      <category><![CDATA[${post.section?.name || 'عام'}]]></category>
+      ${post.coverImage ? `<enclosure url="${post.coverImage}" type="image/jpeg" />` : ''}
     </item>`
     }).join('')}
   </channel>

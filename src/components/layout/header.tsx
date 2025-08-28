@@ -104,14 +104,7 @@ export function Header() {
             {/* Login/Subscribe Button */}
             <Button 
               variant="outline"
-              className="hidden md:flex items-center gap-2 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-              style={{ 
-                borderColor: isDark ? '#333' : '#f0f0ef',
-                borderWidth: '1px',
-                borderRadius: '8px',
-                backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
-                boxShadow: 'none'
-              }}
+              className="hidden md:flex items-center gap-2 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg shadow-none"
             >
               <span className="text-sm">ابدأ الكتابة</span>
             </Button>
@@ -120,14 +113,8 @@ export function Header() {
             <Button
               variant="outline"
               size="icon"
-              className="md:hidden"
+              className="md:hidden border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg shadow-none"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              style={{ 
-                borderColor: isDark ? '#333' : '#f0f0ef',
-                borderRadius: '8px',
-                backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
-                boxShadow: 'none'
-              }}
             >
               {isMenuOpen ? (
                 <X className="h-4 w-4 text-gray-600 dark:text-gray-400" />

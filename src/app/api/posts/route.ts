@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit
 
-    const where: Record<string, unknown> = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {}
     
     if (status && status !== 'all') {
       where.status = status
@@ -40,8 +41,12 @@ export async function GET(request: NextRequest) {
           author: {
             select: { id: true, name: true, email: true }
           },
-          category: true,
-          tags: true,
+          section: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          },
           _count: {
             select: { comments: true }
           }
@@ -87,55 +92,73 @@ export async function POST(request: NextRequest) {
     const {
       title,
       slug,
-      excerpt,
+      summary,
       content,
-      status = 'draft',
-      categoryId,
-      tagIds = [],
-      featuredImage,
-      metaTitle,
-      metaDescription,
-      publishedAt
+      status,
+      coverImage,
+      publishedAt,
+      sectionId,
+      tagIds = []
     } = body
 
-    // التحقق من عدم تكرار الـ slug
-    const existingPost = await prisma.post.findUnique({
-      where: { slug }
-    })
-
-    if (existingPost) {
+    // التحقق من البيانات المطلوبة
+    if (!title || !content) {
       return NextResponse.json(
-        { error: 'الرابط المختصر مستخدم بالفعل' },
+        { error: 'العنوان والمحتوى مطلوبان' },
         { status: 400 }
       )
+    }
+
+    // التحقق من عدم تكرار الـ slug
+    if (slug) {
+      const existingPost = await prisma.post.findUnique({
+        where: { slug }
+      })
+
+      if (existingPost) {
+        return NextResponse.json(
+          { error: 'الرابط المختصر مستخدم بالفعل' },
+          { status: 400 }
+        )
+      }
     }
 
     // إنشاء المقال
     const post = await prisma.post.create({
       data: {
         title,
-        slug,
-        excerpt,
+        slug: slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-أ-ي]/g, ''),
+        summary,
         content,
         status,
-        featuredImage,
-        metaTitle: metaTitle || title,
-        metaDescription: metaDescription || excerpt,
-        publishedAt: status === 'published' ? publishedAt || new Date() : null,
+        coverImage,
+        publishedAt: status === 'PUBLISHED' ? publishedAt || new Date() : null,
         authorId: session.user.id,
-        categoryId,
-        tags: {
-          connect: tagIds.map((id: string) => ({ id }))
-        }
+        sectionId
       },
       include: {
         author: {
           select: { id: true, name: true, email: true }
         },
-        category: true,
-        tags: true
+        section: true,
+        tags: {
+          include: {
+            tag: true
+          }
+        }
       }
     })
+
+    // إضافة الوسوم
+    if (tagIds.length > 0) {
+      await prisma.postTag.createMany({
+        data: tagIds.map((tagId: string) => ({
+          postId: post.id,
+          tagId
+        })),
+        skipDuplicates: true
+      })
+    }
 
     return NextResponse.json(post, { status: 201 })
   } catch (error) {

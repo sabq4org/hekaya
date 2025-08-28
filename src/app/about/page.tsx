@@ -49,7 +49,7 @@ export default function AboutPage() {
 
           {/* Mission Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+            <Card className="bg-white dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-xl shadow-none">
               <CardContent className="p-6 text-center">
                 <div className="p-4 rounded-full mx-auto mb-4 w-fit bg-gray-100 dark:bg-gray-700">
                   <Target className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -61,7 +61,7 @@ export default function AboutPage() {
               </CardContent>
             </Card>
             
-            <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+            <Card className="bg-white dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-xl shadow-none">
               <CardContent className="p-6 text-center">
                 <div className="p-4 rounded-full mx-auto mb-4 w-fit bg-gray-100 dark:bg-gray-700">
                   <Users className="w-8 h-8 text-purple-600 dark:text-purple-400" />
@@ -73,7 +73,7 @@ export default function AboutPage() {
               </CardContent>
             </Card>
             
-            <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+            <Card className="bg-white dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-xl shadow-none">
               <CardContent className="p-6 text-center">
                 <div className="p-4 rounded-full mx-auto mb-4 w-fit bg-gray-100 dark:bg-gray-700">
                   <BookOpen className="w-8 h-8 text-pink-600 dark:text-pink-400" />
@@ -87,7 +87,7 @@ export default function AboutPage() {
           </div>
 
           {/* Story Card */}
-          <Card className="mb-12 bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+          <Card className="mb-12 bg-white dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-xl shadow-none">
             <CardHeader className="pb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-700">

@@ -5,7 +5,7 @@ export async function GET() {
   try {
     // جلب جميع المقالات المنشورة
     const posts = await prisma.post.findMany({
-      where: { status: 'published' },
+      where: { status: 'PUBLISHED' },
       select: {
         slug: true,
         updatedAt: true,
@@ -13,8 +13,8 @@ export async function GET() {
       orderBy: { updatedAt: 'desc' }
     })
 
-    // جلب جميع التصنيفات
-    const categories = await prisma.category.findMany({
+    // جلب جميع الأقسام
+    const sections = await prisma.section.findMany({
       select: {
         slug: true,
         updatedAt: true,
@@ -66,11 +66,11 @@ export async function GET() {
     <priority>0.7</priority>
   </url>`).join('')}
   
-  ${categories.map(category => `
-  <!-- تصنيف: ${category.slug} -->
+  ${sections.map(section => `
+  <!-- قسم: ${section.slug} -->
   <url>
-    <loc>${baseUrl}/categories/${category.slug}</loc>
-    <lastmod>${category.updatedAt.toISOString()}</lastmod>
+    <loc>${baseUrl}/sections/${section.slug}</loc>
+    <lastmod>${section.updatedAt.toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>`).join('')}
