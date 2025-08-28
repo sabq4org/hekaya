@@ -1,4 +1,65 @@
+'use client'
+
+import { useState } from 'react'
+import { signIn, useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+
 export default function LoginPage() {
+  const [email, setEmail] = useState('admin@hekaya-ai.com')
+  const [password, setPassword] = useState('admin123')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (session && ['ADMIN', 'EDITOR', 'AUTHOR'].includes(session.user.role)) {
+      router.push('/admin')
+    }
+  }, [session, router])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError('بيانات تسجيل الدخول غير صحيحة')
+      } else if (result?.ok) {
+        router.push('/admin')
+      }
+    } catch (err) {
+      setError('حدث خطأ أثناء تسجيل الدخول')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (status === 'loading') {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: '#f8f8f7'
+      }}>
+        <div>جاري التحميل...</div>
+      </div>
+    )
+  }
+
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -33,7 +94,20 @@ export default function LoginPage() {
           ادخل بياناتك للوصول إلى لوحة التحكم
         </p>
         
-        <form action="/api/auth/signin" method="POST">
+        {error && (
+          <div style={{
+            padding: '0.75rem',
+            marginBottom: '1rem',
+            backgroundColor: '#fee',
+            color: '#c00',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ 
               display: 'block',
@@ -45,15 +119,16 @@ export default function LoginPage() {
             </label>
             <input
               type="email"
-              name="email"
-              defaultValue="admin@hekaya-ai.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               style={{ 
                 width: '100%',
                 padding: '0.75rem',
                 border: '1px solid #f0f0ef',
                 borderRadius: '8px',
-                fontSize: '1rem'
+                fontSize: '1rem',
+                boxSizing: 'border-box'
               }}
             />
           </div>
@@ -69,34 +144,36 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
-              name="password"
-              defaultValue="admin123"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               style={{ 
                 width: '100%',
                 padding: '0.75rem',
                 border: '1px solid #f0f0ef',
                 borderRadius: '8px',
-                fontSize: '1rem'
+                fontSize: '1rem',
+                boxSizing: 'border-box'
               }}
             />
           </div>
 
           <button
             type="submit"
+            disabled={isLoading}
             style={{ 
               width: '100%',
               padding: '0.75rem',
-              background: 'linear-gradient(to right, #2563eb, #9333ea, #ec4899)',
+              background: isLoading ? '#ccc' : 'linear-gradient(to right, #2563eb, #9333ea, #ec4899)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               fontSize: '1rem',
               fontWeight: '500',
-              cursor: 'pointer'
+              cursor: isLoading ? 'not-allowed' : 'pointer'
             }}
           >
-            تسجيل الدخول
+            {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
           </button>
         </form>
 

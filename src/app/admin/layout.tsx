@@ -1,10 +1,11 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { redirect } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { AdminSidebar } from "@/components/admin/sidebar"
 import { AdminHeader } from "@/components/admin/header"
 import { IBM_Plex_Sans_Arabic } from 'next/font/google'
+import { useEffect } from 'react'
 
 const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
@@ -18,6 +19,17 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const { data: session, status } = useSession()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Allow login page without authentication
+  const isLoginPage = pathname === '/admin/login'
+
+  useEffect(() => {
+    if (status === 'unauthenticated' && !isLoginPage) {
+      router.push('/admin/login')
+    }
+  }, [status, isLoginPage, router])
 
   if (status === 'loading') {
     return (
@@ -30,8 +42,26 @@ export default function AdminLayout({
     )
   }
 
+  // Render login page without admin layout
+  if (isLoginPage) {
+    return <>{children}</>
+  }
+
+  // Check authentication for other admin pages
   if (!session || !['ADMIN', 'EDITOR', 'AUTHOR'].includes(session.user.role)) {
-    redirect('/admin/login')
+    return (
+      <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${ibmPlexArabic.className}`}>
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">غير مخول للوصول</p>
+          <button 
+            onClick={() => router.push('/admin/login')}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            تسجيل الدخول
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
