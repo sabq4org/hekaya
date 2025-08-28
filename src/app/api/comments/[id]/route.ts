@@ -3,21 +3,15 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requireAuth,
-  requirePermission,
-  validateRequired,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
-import { CommentStatus, Role } from '@prisma/client'
 
 // GET /api/comments/[id] - الحصول على تعليق واحد
 export const GET = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   const commentId = params.id
   const url = new URL(request.url)
   const includeReplies = url.searchParams.get('includeReplies') === 'true'
@@ -109,7 +103,7 @@ export const PUT = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   const data = await request.json()
   const commentId = params.id
   
@@ -140,7 +134,7 @@ export const PUT = withErrorHandling(async (
   }
   
   // إعداد البيانات للتحديث
-  const updateData: any = {}
+  const updateData: Record<string, unknown> = {}
   
   if (data.content) updateData.content = data.content
   if (data.authorName !== undefined) updateData.authorName = data.authorName
@@ -217,7 +211,7 @@ export const DELETE = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   const commentId = params.id
   
   // البحث عن التعليق
@@ -277,7 +271,7 @@ export const PATCH = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   const { action, data } = await request.json()
   const commentId = params.id
   

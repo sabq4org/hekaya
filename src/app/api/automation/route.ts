@@ -3,19 +3,15 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requirePermission,
   parsePagination,
   parseFilters,
-  validateRequired,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
 import { AutomationStatus, AutomationType } from '@prisma/client'
 
 // GET /api/automation - الحصول على قائمة المهام المجدولة
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.VIEW_AUTOMATION)
+  await requirePermission(request, Permission.VIEW_AUTOMATION)
   const { page, limit, skip } = parsePagination(request)
   const filters = parseFilters(request)
   const url = new URL(request.url)
@@ -26,7 +22,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const includeStats = url.searchParams.get('includeStats') === 'true'
   
   // بناء شروط البحث
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   
   // البحث النصي
   if (filters.search) {
@@ -46,7 +42,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     where.type = type
   }
   
-  const includeOptions: any = {
+  const includeOptions: Record<string, unknown> = {
     author: {
       select: {
         id: true,
@@ -98,7 +94,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/automation - إنشاء مهمة مجدولة جديدة
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MANAGE_AUTOMATION)
+  await await requirePermission(request, Permission.MANAGE_AUTOMATION)
   const data = await request.json()
   
   // التحقق من البيانات المطلوبة
@@ -150,7 +146,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 // PATCH /api/automation/bulk - عمليات جماعية على المهام
 export const PATCH = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MANAGE_AUTOMATION)
+  await await requirePermission(request, Permission.MANAGE_AUTOMATION)
   const { action, automationIds, data } = await request.json()
   
   validateRequired({ action, automationIds }, ['action', 'automationIds'])
@@ -292,7 +288,7 @@ export const PATCH = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/automation/execute - تشغيل المهام المستحقة
 export const POST_EXECUTE = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MANAGE_AUTOMATION)
+  await await requirePermission(request, Permission.MANAGE_AUTOMATION)
   
   // البحث عن المهام المستحقة للتشغيل
   const dueAutomations = await prisma.automation.findMany({
@@ -424,7 +420,7 @@ function calculateNextRun(schedule: string): Date {
   return new Date(now.getTime() + 60 * 60 * 1000)
 }
 
-async function executeAutomation(automation: any): Promise<void> {
+async function executeAutomation(automation: { id: string; type: string; config: Record<string, unknown>; schedule: string }): Promise<void> {
   // إنشاء سجل تنفيذ
   const execution = await prisma.automationExecution.create({
     data: {
@@ -435,7 +431,7 @@ async function executeAutomation(automation: any): Promise<void> {
   })
   
   try {
-    let result: any = {}
+    let result: Record<string, unknown> = {}
     
     // تنفيذ المهمة حسب النوع
     switch (automation.type) {
@@ -540,7 +536,7 @@ async function publishScheduledPosts(): Promise<any> {
   return { publishedPosts: publishedCount.count }
 }
 
-async function archiveOldPosts(config: any): Promise<any> {
+async function archiveOldPosts(config: Record<string, unknown>): Promise<any> {
   // أرشفة المقالات القديمة
   const daysOld = config.daysOld || 365
   const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000)
@@ -603,7 +599,7 @@ async function sendScheduledNewsletters(): Promise<any> {
   return { sentCampaigns: sentCount.count }
 }
 
-async function backupData(config: any): Promise<any> {
+async function backupData(config: Record<string, unknown>): Promise<any> {
   // نسخ احتياطي للبيانات
   // في التطبيق الحقيقي، هنا يتم إنشاء نسخة احتياطية
   
@@ -668,7 +664,7 @@ async function updateStatistics(): Promise<any> {
   }
 }
 
-async function cleanupOldLogs(config: any): Promise<any> {
+async function cleanupOldLogs(config: Record<string, unknown>): Promise<any> {
   // تنظيف السجلات القديمة
   const daysOld = config.daysOld || 90
   const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000)

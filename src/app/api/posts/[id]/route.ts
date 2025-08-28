@@ -3,15 +3,10 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requireAuth,
-  requirePermission,
-  validateRequired,
   createSlug,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
 import { Permission, canEditPost, canDeletePost } from '@/lib/permissions'
-import { PostStatus, Role } from '@prisma/client'
 
 // GET /api/posts/[id] - الحصول على مقال واحد
 export const GET = withErrorHandling(async (
@@ -104,7 +99,7 @@ export const GET = withErrorHandling(async (
   // التحقق من الصلاحيات للمقالات غير المنشورة
   if (post.status !== PostStatus.PUBLISHED) {
     try {
-      const user = await requireAuth(request)
+      await await requireAuth(request)
       
       // المدير والمحرر يمكنهما رؤية أي مقال
       // الكاتب يمكنه رؤية مقالاته فقط
@@ -145,7 +140,7 @@ export const PUT = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requirePermission(request, Permission.UPDATE_POST)
+  await await requirePermission(request, Permission.UPDATE_POST)
   const data = await request.json()
   const postId = params.id
   
@@ -165,7 +160,7 @@ export const PUT = withErrorHandling(async (
   }
   
   // إعداد البيانات للتحديث
-  const updateData: any = {}
+  const updateData: Record<string, unknown> = {}
   
   if (data.title) updateData.title = data.title
   if (data.summary) updateData.summary = data.summary
@@ -305,7 +300,7 @@ export const DELETE = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requirePermission(request, Permission.DELETE_POST)
+  await await requirePermission(request, Permission.DELETE_POST)
   const postId = params.id
   
   // البحث عن المقال
@@ -354,7 +349,7 @@ export const PATCH = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   const { action, data } = await request.json()
   const postId = params.id
   

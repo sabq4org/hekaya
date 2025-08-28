@@ -3,18 +3,11 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  errorResponse,
-  requireAuth,
-  requirePermission,
   parsePagination,
   parseFilters,
-  validateRequired,
   createSlug,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
-import { PostStatus, Role } from '@prisma/client'
 
 // GET /api/posts - الحصول على قائمة المقالات
 export const GET = withErrorHandling(async (request: NextRequest) => {
@@ -30,7 +23,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const tagId = url.searchParams.get('tagId')
   
   // بناء شروط البحث
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   
   // البحث النصي
   if (filters.search) {
@@ -78,7 +71,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   
   // التحقق من الصلاحيات
   try {
-    const user = await requireAuth(request)
+    await await requireAuth(request)
     
     // إذا لم يكن مدير أو محرر، يرى مقالاته فقط
     if (user.role === Role.AUTHOR) {
@@ -155,7 +148,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/posts - إنشاء مقال جديد
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.CREATE_POST)
+  await await requirePermission(request, Permission.CREATE_POST)
   const data = await request.json()
   
   // التحقق من البيانات المطلوبة
@@ -183,7 +176,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   }
   
   // إعداد البيانات للإنشاء
-  const postData: any = {
+  const postData: Record<string, unknown> = {
     title: data.title,
     slug: data.slug,
     summary: data.summary,
@@ -263,7 +256,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 // PUT /api/posts/bulk - عمليات جماعية
 export const PUT = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.UPDATE_POST)
+  await await requirePermission(request, Permission.UPDATE_POST)
   const { action, postIds, data } = await request.json()
   
   validateRequired({ action, postIds }, ['action', 'postIds'])
@@ -278,7 +271,7 @@ export const PUT = withErrorHandling(async (request: NextRequest) => {
     case 'updateStatus':
       validateRequired(data, ['status'])
       
-      const updateData: any = { status: data.status }
+      const updateData: Record<string, unknown> = { status: data.status }
       
       // إذا كان النشر، تعيين تاريخ النشر
       if (data.status === PostStatus.PUBLISHED) {

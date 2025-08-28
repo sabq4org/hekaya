@@ -3,13 +3,9 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requirePermission,
-  validateRequired,
   createSlug,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
 
 // GET /api/tags/[id] - الحصول على وسم واحد
 export const GET = withErrorHandling(async (
@@ -99,7 +95,7 @@ export const PUT = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requirePermission(request, Permission.UPDATE_TAG)
+  await await requirePermission(request, Permission.UPDATE_TAG)
   const data = await request.json()
   const tagId = params.id
   
@@ -113,7 +109,7 @@ export const PUT = withErrorHandling(async (
   }
   
   // إعداد البيانات للتحديث
-  const updateData: any = {}
+  const updateData: Record<string, unknown> = {}
   
   if (data.name) {
     // التأكد من عدم تكرار الاسم
@@ -187,7 +183,7 @@ export const DELETE = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requirePermission(request, Permission.DELETE_TAG)
+  await await requirePermission(request, Permission.DELETE_TAG)
   const tagId = params.id
   const url = new URL(request.url)
   const force = url.searchParams.get('force') === 'true'
@@ -235,7 +231,7 @@ export const PATCH = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requirePermission(request, Permission.UPDATE_TAG)
+  await await requirePermission(request, Permission.UPDATE_TAG)
   const { action, data } = await request.json()
   const tagId = params.id
   

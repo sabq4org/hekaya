@@ -3,15 +3,11 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requirePermission,
-  validateRequired,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
 
 // GET /api/analytics - الحصول على التحليلات العامة
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.VIEW_ANALYTICS)
+  await requirePermission(request, Permission.VIEW_ANALYTICS)
   const url = new URL(request.url)
   
   // فلاتر التاريخ
@@ -219,7 +215,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // GET /api/analytics/posts - تحليلات المقالات المفصلة
 export const GET_POSTS = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.VIEW_ANALYTICS)
+  await await requirePermission(request, Permission.VIEW_ANALYTICS)
   const url = new URL(request.url)
   
   const period = url.searchParams.get('period') || '30d'
@@ -229,7 +225,7 @@ export const GET_POSTS = withErrorHandling(async (request: NextRequest) => {
   const dateRange = getDateRange(period)
   
   // بناء شروط البحث
-  const where: any = {
+  const where: Record<string, unknown> = {
     status: 'PUBLISHED',
     publishedAt: {
       gte: dateRange.start,
@@ -322,7 +318,7 @@ export const GET_POSTS = withErrorHandling(async (request: NextRequest) => {
 
 // GET /api/analytics/users - تحليلات المستخدمين
 export const GET_USERS = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.VIEW_ANALYTICS)
+  await requirePermission(request, Permission.VIEW_ANALYTICS)
   const url = new URL(request.url)
   
   const period = url.searchParams.get('period') || '30d'
@@ -583,7 +579,7 @@ async function getEngagementStats(dateRange: { start: Date; end: Date }) {
   }
 }
 
-async function getViewsOverTime(where: any, dateRange: { start: Date; end: Date }) {
+async function getViewsOverTime(where: Record<string, unknown>, dateRange: { start: Date; end: Date }) {
   // هذه دالة مبسطة - في التطبيق الحقيقي يجب تجميع البيانات يومياً
   const days = []
   const dayMs = 24 * 60 * 60 * 1000
@@ -603,7 +599,7 @@ async function getViewsOverTime(where: any, dateRange: { start: Date; end: Date 
   return days
 }
 
-async function getPostEngagementMetrics(where: any) {
+async function getPostEngagementMetrics(where: Record<string, unknown>) {
   // مقاييس التفاعل للمقالات
   return {
     highEngagement: 0, // مقالات عالية التفاعل

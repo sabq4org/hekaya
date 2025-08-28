@@ -3,20 +3,14 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requireAuth,
-  requirePermission,
   parsePagination,
   parseFilters,
-  validateRequired,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
-import { CommentStatus, Role } from '@prisma/client'
 
 // GET /api/comments - الحصول على قائمة التعليقات
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   const { page, limit, skip } = parsePagination(request)
   const filters = parseFilters(request)
   const url = new URL(request.url)
@@ -30,7 +24,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const onlyParents = url.searchParams.get('onlyParents') === 'true'
   
   // بناء شروط البحث
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   
   // البحث النصي
   if (filters.search) {
@@ -70,7 +64,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
   
   // إضافة الردود إذا طُلبت
-  const includeOptions: any = {
+  const includeOptions: Record<string, unknown> = {
     author: {
       select: {
         id: true,
@@ -142,7 +136,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/comments - إنشاء تعليق جديد
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   const data = await request.json()
   
   // التحقق من البيانات المطلوبة
@@ -290,7 +284,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 // PATCH /api/comments/bulk - عمليات جماعية على التعليقات
 export const PATCH = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MODERATE_COMMENT)
+  await await requirePermission(request, Permission.MODERATE_COMMENT)
   const { action, commentIds, data } = await request.json()
   
   validateRequired({ action, commentIds }, ['action', 'commentIds'])
@@ -429,7 +423,7 @@ export const PATCH = withErrorHandling(async (request: NextRequest) => {
 
 // DELETE /api/comments/spam - حذف جميع التعليقات المصنفة كسبام
 export const DELETE = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.DELETE_COMMENT)
+  await await requirePermission(request, Permission.DELETE_COMMENT)
   
   // حذف التعليقات المصنفة كسبام
   const result = await prisma.comment.deleteMany({

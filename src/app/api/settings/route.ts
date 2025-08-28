@@ -3,17 +3,13 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requirePermission,
-  validateRequired,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
 import { SettingType } from '@prisma/client'
 
 // GET /api/settings - الحصول على جميع الإعدادات
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.VIEW_SETTING)
+  await await requirePermission(request, Permission.VIEW_SETTING)
   const url = new URL(request.url)
   
   // فلاتر
@@ -23,7 +19,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const grouped = url.searchParams.get('grouped') === 'true'
   
   // بناء شروط البحث
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   
   if (category) {
     where.category = category
@@ -64,7 +60,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/settings - إنشاء إعداد جديد
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MANAGE_SETTING)
+  await await requirePermission(request, Permission.MANAGE_SETTING)
   const data = await request.json()
   
   // التحقق من البيانات المطلوبة
@@ -122,7 +118,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 // PUT /api/settings/bulk - تحديث إعدادات متعددة
 export const PUT = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MANAGE_SETTING)
+  await await requirePermission(request, Permission.MANAGE_SETTING)
   const { settings } = await request.json()
   
   validateRequired({ settings }, ['settings'])
@@ -193,10 +189,10 @@ export const PUT = withErrorHandling(async (request: NextRequest) => {
 
 // PATCH /api/settings/reset - إعادة تعيين الإعدادات للقيم الافتراضية
 export const PATCH = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MANAGE_SETTING)
+  await await requirePermission(request, Permission.MANAGE_SETTING)
   const { category, keys } = await request.json()
   
-  let where: any = {}
+  let where: Record<string, unknown> = {}
   
   if (category) {
     where.category = category

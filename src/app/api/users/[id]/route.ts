@@ -3,14 +3,8 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requireAuth,
-  requirePermission,
-  validateRequired,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
-import { Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 // GET /api/users/[id] - الحصول على مستخدم واحد
@@ -33,7 +27,7 @@ export const GET = withErrorHandling(async (
     throw new Error(ApiErrors.FORBIDDEN)
   }
   
-  const includeOptions: any = {}
+  const includeOptions: Record<string, unknown> = {}
   
   // إضافة الإحصائيات إذا طُلبت
   if (includeStats) {
@@ -147,7 +141,7 @@ export const PUT = withErrorHandling(async (
   }
   
   // إعداد البيانات للتحديث
-  const updateData: any = {}
+  const updateData: Record<string, unknown> = {}
   
   // البيانات الأساسية (يمكن للمستخدم تعديلها)
   if (data.name) updateData.name = data.name

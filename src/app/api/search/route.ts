@@ -3,12 +3,9 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requireAuth,
   parsePagination,
-  validateRequired,
   logApiAction,
 } from '@/lib/api-helpers'
-import { Role } from '@prisma/client'
 
 // GET /api/search - البحث الشامل
 export const GET = withErrorHandling(async (request: NextRequest) => {
@@ -34,7 +31,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const searchQuery = query.trim()
   const searchTypes = type ? [type] : ['posts', 'users', 'sections', 'tags']
   
-  const results: any = {}
+  const results: Record<string, unknown> = {}
   let totalResults = 0
   
   // البحث في المقالات
@@ -211,7 +208,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   // البحث في التعليقات (للمدراء والمحررين فقط)
   if ((searchTypes.includes('comments') || searchTypes.includes('all'))) {
     try {
-      const user = await requireAuth(request)
+      await await requireAuth(request)
       if (user.role === Role.ADMIN || user.role === Role.EDITOR) {
         const commentsWhere = buildCommentsSearchWhere(searchQuery)
         
@@ -277,7 +274,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/search/index - إعادة فهرسة المحتوى
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   
   // فقط المدراء يمكنهم إعادة الفهرسة
   if (user.role !== Role.ADMIN) {
@@ -384,8 +381,8 @@ export const GET_POPULAR = withErrorHandling(async (request: NextRequest) => {
 
 // دوال مساعدة
 
-function buildPostsSearchWhere(query: string, filters: any) {
-  const where: any = {
+function buildPostsSearchWhere(query: string, filters: Record<string, unknown>) {
+  const where: Record<string, unknown> = {
     AND: [
       {
         OR: [
@@ -417,7 +414,7 @@ function buildPostsSearchWhere(query: string, filters: any) {
   }
   
   if (filters.dateFrom || filters.dateTo) {
-    const dateFilter: any = {}
+    const dateFilter: Record<string, unknown> = {}
     if (filters.dateFrom) dateFilter.gte = new Date(filters.dateFrom)
     if (filters.dateTo) dateFilter.lte = new Date(filters.dateTo)
     where.AND.push({ publishedAt: dateFilter })
@@ -480,7 +477,7 @@ function getPostsOrderBy(sortBy: string) {
   }
 }
 
-function calculatePostRelevance(post: any, query: string): number {
+function calculatePostRelevance(post: Record<string, unknown>, query: string): number {
   let score = 0
   const queryLower = query.toLowerCase()
   
@@ -500,7 +497,7 @@ function calculatePostRelevance(post: any, query: string): number {
   }
   
   // نقاط للوسوم
-  if (post.tags?.some((tag: any) => tag.name.toLowerCase().includes(queryLower))) {
+  if (post.tags?.some((tag: Record<string, unknown>) => tag.name.toLowerCase().includes(queryLower))) {
     score += 7
   }
   

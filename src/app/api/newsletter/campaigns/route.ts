@@ -3,19 +3,15 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requirePermission,
   parsePagination,
   parseFilters,
-  validateRequired,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
 import { CampaignStatus, SubscriberStatus } from '@prisma/client'
 
 // GET /api/newsletter/campaigns - الحصول على قائمة الحملات
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.VIEW_NEWSLETTER)
+  await await requirePermission(request, Permission.VIEW_NEWSLETTER)
   const { page, limit, skip } = parsePagination(request)
   const filters = parseFilters(request)
   const url = new URL(request.url)
@@ -25,7 +21,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const includeStats = url.searchParams.get('includeStats') === 'true'
   
   // بناء شروط البحث
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   
   // البحث النصي
   if (filters.search) {
@@ -40,7 +36,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     where.status = status
   }
   
-  const includeOptions: any = {
+  const includeOptions: Record<string, unknown> = {
     author: {
       select: {
         id: true,
@@ -79,7 +75,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/newsletter/campaigns - إنشاء حملة جديدة
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MANAGE_NEWSLETTER)
+  await await requirePermission(request, Permission.MANAGE_NEWSLETTER)
   const data = await request.json()
   
   // التحقق من البيانات المطلوبة
@@ -124,7 +120,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 // PATCH /api/newsletter/campaigns/bulk - عمليات جماعية على الحملات
 export const PATCH = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MANAGE_NEWSLETTER)
+  await await requirePermission(request, Permission.MANAGE_NEWSLETTER)
   const { action, campaignIds, data } = await request.json()
   
   validateRequired({ action, campaignIds }, ['action', 'campaignIds'])

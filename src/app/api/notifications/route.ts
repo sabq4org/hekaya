@@ -3,20 +3,14 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requireAuth,
-  requirePermission,
   parsePagination,
   parseFilters,
-  validateRequired,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
-import { NotificationType, NotificationStatus, Role } from '@prisma/client'
 
 // GET /api/notifications - الحصول على إشعارات المستخدم
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   const { page, limit, skip } = parsePagination(request)
   const filters = parseFilters(request)
   const url = new URL(request.url)
@@ -27,7 +21,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const unreadOnly = url.searchParams.get('unreadOnly') === 'true'
   
   // بناء شروط البحث
-  const where: any = {
+  const where: Record<string, unknown> = {
     userId: user.id,
   }
   
@@ -78,7 +72,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/notifications - إنشاء إشعار جديد
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.SEND_NOTIFICATION)
+  await await requirePermission(request, Permission.SEND_NOTIFICATION)
   const data = await request.json()
   
   // التحقق من البيانات المطلوبة
@@ -154,13 +148,13 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 // PATCH /api/notifications/bulk - عمليات جماعية على الإشعارات
 export const PATCH = withErrorHandling(async (request: NextRequest) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   const { action, notificationIds } = await request.json()
   
   validateRequired({ action }, ['action'])
   
   // بناء شروط التحديث
-  const where: any = {
+  const where: Record<string, unknown> = {
     userId: user.id, // المستخدم يمكنه تعديل إشعاراته فقط
   }
   
@@ -274,7 +268,7 @@ export const PATCH = withErrorHandling(async (request: NextRequest) => {
 
 // GET /api/notifications/stats - إحصائيات الإشعارات
 export const GET_STATS = withErrorHandling(async (request: NextRequest) => {
-  const user = await requireAuth(request)
+  await await requireAuth(request)
   
   const [
     totalNotifications,
@@ -340,12 +334,12 @@ export const GET_STATS = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/notifications/system - إرسال إشعارات النظام
 export const POST_SYSTEM = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.SEND_NOTIFICATION)
+  await await requirePermission(request, Permission.SEND_NOTIFICATION)
   const { event, data } = await request.json()
   
   validateRequired({ event }, ['event'])
   
-  let notifications: any[] = []
+  let notifications: Record<string, unknown>[] = []
   
   switch (event) {
     case 'POST_PUBLISHED':
@@ -629,7 +623,7 @@ async function createSystemMaintenanceNotifications(message: string, scheduledAt
   return Array(notifications.count).fill(null)
 }
 
-async function createSecurityAlertNotifications(alertType: string, details: any): Promise<any[]> {
+async function createSecurityAlertNotifications(alertType: string, details: Record<string, unknown>): Promise<any[]> {
   // إشعار المدراء بتنبيه أمني
   const admins = await prisma.user.findMany({
     where: {

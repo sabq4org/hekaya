@@ -3,15 +3,11 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requirePermission,
   parsePagination,
   parseFilters,
-  validateRequired,
   createSlug,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
 
 // GET /api/sections - الحصول على قائمة الأقسام
 export const GET = withErrorHandling(async (request: NextRequest) => {
@@ -25,7 +21,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const hierarchical = url.searchParams.get('hierarchical') === 'true'
   
   // بناء شروط البحث
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   
   // البحث النصي
   if (filters.search) {
@@ -45,7 +41,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     where.parentId = null
   }
   
-  const includeOptions: any = {
+  const includeOptions: Record<string, unknown> = {
     parent: {
       select: {
         id: true,
@@ -105,7 +101,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/sections - إنشاء قسم جديد
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.CREATE_SECTION)
+  await await requirePermission(request, Permission.CREATE_SECTION)
   const data = await request.json()
   
   // التحقق من البيانات المطلوبة
@@ -191,7 +187,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 // PUT /api/sections/reorder - إعادة ترتيب الأقسام
 export const PUT = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.UPDATE_SECTION)
+  await await requirePermission(request, Permission.UPDATE_SECTION)
   const { sections } = await request.json()
   
   validateRequired({ sections }, ['sections'])
@@ -201,7 +197,7 @@ export const PUT = withErrorHandling(async (request: NextRequest) => {
   }
   
   // تحديث ترتيب الأقسام
-  const updatePromises = sections.map((section: any, index: number) =>
+  const updatePromises = sections.map((section: Record<string, unknown>, index: number) =>
     prisma.section.update({
       where: { id: section.id },
       data: { 
@@ -219,7 +215,7 @@ export const PUT = withErrorHandling(async (request: NextRequest) => {
     'SECTIONS_REORDER',
     'SECTION',
     undefined,
-    { sectionIds: sections.map((s: any) => s.id), count: sections.length }
+    { sectionIds: sections.map((s: Record<string, unknown>) => s.id), count: sections.length }
   )
   
   return successResponse(null, 'تم إعادة ترتيب الأقسام بنجاح')
@@ -227,7 +223,7 @@ export const PUT = withErrorHandling(async (request: NextRequest) => {
 
 // PATCH /api/sections/bulk - عمليات جماعية على الأقسام
 export const PATCH = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.UPDATE_SECTION)
+  await await requirePermission(request, Permission.UPDATE_SECTION)
   const { action, sectionIds, data } = await request.json()
   
   validateRequired({ action, sectionIds }, ['action', 'sectionIds'])

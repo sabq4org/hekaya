@@ -3,15 +3,11 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requirePermission,
   parsePagination,
   parseFilters,
-  validateRequired,
   createSlug,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
 
 // GET /api/tags - الحصول على قائمة الوسوم
 export const GET = withErrorHandling(async (request: NextRequest) => {
@@ -26,7 +22,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const popular = url.searchParams.get('popular') === 'true'
   
   // بناء شروط البحث
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   
   // البحث النصي
   if (filters.search) {
@@ -45,12 +41,12 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
   
   // ترتيب خاص للوسوم الشائعة
-  let orderBy: any = { [filters.sortBy]: filters.sortOrder }
+  let orderBy: Record<string, unknown> = { [filters.sortBy]: filters.sortOrder }
   if (popular) {
     orderBy = { usageCount: 'desc' }
   }
   
-  const includeOptions: any = {}
+  const includeOptions: Record<string, unknown> = {}
   
   // إضافة الإحصائيات إذا طُلبت
   if (includeStats) {
@@ -82,7 +78,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/tags - إنشاء وسم جديد
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.CREATE_TAG)
+  await await requirePermission(request, Permission.CREATE_TAG)
   const data = await request.json()
   
   // التحقق من البيانات المطلوبة
@@ -143,7 +139,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 // PUT /api/tags/merge - دمج وسوم
 export const PUT = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.MERGE_TAG)
+  await await requirePermission(request, Permission.MERGE_TAG)
   const { sourceTagIds, targetTagId } = await request.json()
   
   validateRequired({ sourceTagIds, targetTagId }, ['sourceTagIds', 'targetTagId'])
@@ -229,7 +225,7 @@ export const PUT = withErrorHandling(async (request: NextRequest) => {
 
 // PATCH /api/tags/bulk - عمليات جماعية على الوسوم
 export const PATCH = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.UPDATE_TAG)
+  await await requirePermission(request, Permission.UPDATE_TAG)
   const { action, tagIds, data } = await request.json()
   
   validateRequired({ action, tagIds }, ['action', 'tagIds'])
@@ -367,7 +363,7 @@ export const PATCH = withErrorHandling(async (request: NextRequest) => {
 
 // DELETE /api/tags/unused - حذف جميع الوسوم غير المستخدمة
 export const DELETE = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.DELETE_TAG)
+  await await requirePermission(request, Permission.DELETE_TAG)
   
   // حذف الوسوم غير المستخدمة
   const result = await prisma.tag.deleteMany({

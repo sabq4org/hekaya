@@ -3,13 +3,9 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requirePermission,
-  validateRequired,
   createSlug,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
 
 // GET /api/sections/[id] - الحصول على قسم واحد
 export const GET = withErrorHandling(async (
@@ -99,7 +95,7 @@ export const PUT = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requirePermission(request, Permission.UPDATE_SECTION)
+  await await requirePermission(request, Permission.UPDATE_SECTION)
   const data = await request.json()
   const sectionId = params.id
   
@@ -113,7 +109,7 @@ export const PUT = withErrorHandling(async (
   }
   
   // إعداد البيانات للتحديث
-  const updateData: any = {}
+  const updateData: Record<string, unknown> = {}
   
   if (data.name) updateData.name = data.name
   if (data.description !== undefined) updateData.description = data.description
@@ -239,7 +235,7 @@ export const DELETE = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requirePermission(request, Permission.DELETE_SECTION)
+  await await requirePermission(request, Permission.DELETE_SECTION)
   const sectionId = params.id
   
   // البحث عن القسم
@@ -291,7 +287,7 @@ export const PATCH = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const user = await requirePermission(request, Permission.UPDATE_SECTION)
+  await await requirePermission(request, Permission.UPDATE_SECTION)
   const { action, data } = await request.json()
   const sectionId = params.id
   

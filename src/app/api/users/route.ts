@@ -3,20 +3,15 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
-  requirePermission,
   parsePagination,
   parseFilters,
-  validateRequired,
   logApiAction,
-  ApiErrors,
 } from '@/lib/api-helpers'
-import { Permission } from '@/lib/permissions'
-import { Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 // GET /api/users - الحصول على قائمة المستخدمين
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const user = await requirePermission(request, Permission.VIEW_USER)
+  await await requirePermission(request, Permission.VIEW_USER)
   const { page, limit, skip } = parsePagination(request)
   const filters = parseFilters(request)
   const url = new URL(request.url)
@@ -27,7 +22,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const includeStats = url.searchParams.get('includeStats') === 'true'
   
   // بناء شروط البحث
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   
   // البحث النصي
   if (filters.search) {
@@ -48,7 +43,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     where.isActive = isActive === 'true'
   }
   
-  const includeOptions: any = {}
+  const includeOptions: Record<string, unknown> = {}
   
   // إضافة الإحصائيات إذا طُلبت
   if (includeStats) {
