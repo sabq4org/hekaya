@@ -1,458 +1,308 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
   Tag,
+  Plus,
+  Edit,
+  Trash2,
   FileText,
   TrendingUp,
-  Hash
+  MoreVertical,
+  Sparkles,
+  Hash,
+  Palette
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { IBM_Plex_Sans_Arabic } from "next/font/google"
 
-// Mock data - في التطبيق الحقيقي سيتم جلبها من API
-const mockCategories = [
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+})
+
+// Mock data
+const categories = [
   {
     id: '1',
-    name: 'الذكاء الاصطناعي',
-    slug: 'artificial-intelligence',
-    description: 'مقالات حول تطبيقات وتطورات الذكاء الاصطناعي',
-    color: '#3b82f6',
-    postsCount: 15,
-    createdAt: '2024-01-15'
+    name: 'الطب والصحة',
+    slug: 'medicine-health',
+    description: 'مقالات حول تطبيقات الذكاء الاصطناعي في المجال الطبي والصحي',
+    color: '#3B82F6',
+    posts: 12,
+    views: 3420
   },
   {
     id: '2',
-    name: 'الطب والتقنية',
-    slug: 'medical-technology',
-    description: 'التقنيات الحديثة في المجال الطبي والصحي',
-    color: '#10b981',
-    postsCount: 8,
-    createdAt: '2024-02-01'
+    name: 'التعليم',
+    slug: 'education',
+    description: 'استخدامات الذكاء الاصطناعي في تطوير التعليم والتعلم',
+    color: '#10B981',
+    posts: 8,
+    views: 2150
   },
   {
     id: '3',
-    name: 'التعليم والتقنية',
-    slug: 'education-technology',
-    description: 'تطبيقات التقنية في مجال التعليم والتدريب',
-    color: '#f59e0b',
-    postsCount: 12,
-    createdAt: '2024-01-20'
+    name: 'التقنية',
+    slug: 'technology',
+    description: 'آخر التطورات والابتكارات في عالم الذكاء الاصطناعي',
+    color: '#8B5CF6',
+    posts: 15,
+    views: 5230
   },
   {
     id: '4',
-    name: 'الأعمال والتقنية',
-    slug: 'business-technology',
-    description: 'التقنيات المؤثرة في عالم الأعمال والشركات',
-    color: '#8b5cf6',
-    postsCount: 6,
-    createdAt: '2024-02-10'
+    name: 'الصناعة',
+    slug: 'industry',
+    description: 'تطبيقات الذكاء الاصطناعي في القطاع الصناعي',
+    color: '#F59E0B',
+    posts: 5,
+    views: 1820
   },
   {
     id: '5',
-    name: 'الأخلاقيات',
-    slug: 'ethics',
-    description: 'القضايا الأخلاقية المتعلقة بالتقنية والذكاء الاصطناعي',
-    color: '#ef4444',
-    postsCount: 4,
-    createdAt: '2024-02-15'
+    name: 'الأعمال',
+    slug: 'business',
+    description: 'كيف يحول الذكاء الاصطناعي عالم الأعمال',
+    color: '#EF4444',
+    posts: 7,
+    views: 2890
   }
 ]
 
-const mockTags = [
-  { id: '1', name: 'تعلم الآلة', slug: 'machine-learning', postsCount: 12 },
-  { id: '2', name: 'الشبكات العصبية', slug: 'neural-networks', postsCount: 8 },
-  { id: '3', name: 'معالجة اللغة الطبيعية', slug: 'nlp', postsCount: 6 },
-  { id: '4', name: 'رؤية الحاسوب', slug: 'computer-vision', postsCount: 5 },
-  { id: '5', name: 'التشخيص الطبي', slug: 'medical-diagnosis', postsCount: 4 },
-  { id: '6', name: 'التعليم الإلكتروني', slug: 'e-learning', postsCount: 7 },
-  { id: '7', name: 'الأتمتة', slug: 'automation', postsCount: 9 },
-  { id: '8', name: 'البيانات الضخمة', slug: 'big-data', postsCount: 6 }
-]
-
-export default function CategoriesManagement() {
-  const [categories, setCategories] = useState(mockCategories)
-  const [tags, setTags] = useState(mockTags)
-  const [activeTab, setActiveTab] = useState('categories')
+export default function CategoriesPage() {
+  const [showAddModal, setShowAddModal] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [editingItem, setEditingItem] = useState<any>(null)
-
-  // Form states
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    description: '',
-    color: '#3b82f6'
-  })
 
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const filteredTags = tags.filter(tag =>
-    tag.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  const handleAddCategory = () => {
-    const newCategory = {
-      id: Date.now().toString(),
-      name: formData.name,
-      slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
-      description: formData.description,
-      color: formData.color,
-      postsCount: 0,
-      createdAt: new Date().toISOString().split('T')[0]
-    }
-    setCategories([...categories, newCategory])
-    resetForm()
-  }
-
-  const handleAddTag = () => {
-    const newTag = {
-      id: Date.now().toString(),
-      name: formData.name,
-      slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
-      postsCount: 0
-    }
-    setTags([...tags, newTag])
-    resetForm()
-  }
-
-  const handleEdit = (item: any) => {
-    setEditingItem(item)
-    setFormData({
-      name: item.name,
-      slug: item.slug,
-      description: item.description || '',
-      color: item.color || '#3b82f6'
-    })
-    setShowAddForm(true)
-  }
-
-  const handleUpdate = () => {
-    if (activeTab === 'categories') {
-      setCategories(categories.map(cat => 
-        cat.id === editingItem.id 
-          ? { ...cat, ...formData }
-          : cat
-      ))
-    } else {
-      setTags(tags.map(tag => 
-        tag.id === editingItem.id 
-          ? { ...tag, name: formData.name, slug: formData.slug }
-          : tag
-      ))
-    }
-    resetForm()
-  }
-
-  const handleDelete = (id: string) => {
-    if (confirm('هل أنت متأكد من الحذف؟')) {
-      if (activeTab === 'categories') {
-        setCategories(categories.filter(cat => cat.id !== id))
-      } else {
-        setTags(tags.filter(tag => tag.id !== id))
-      }
-    }
-  }
-
-  const resetForm = () => {
-    setFormData({ name: '', slug: '', description: '', color: '#3b82f6' })
-    setShowAddForm(false)
-    setEditingItem(null)
-  }
-
   return (
-    <div className="space-y-6">
+    <div className={`${ibmPlexArabic.className} bg-[#f8f8f7] dark:bg-[#1a1a1a] min-h-screen`}>
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">التصنيفات والوسوم</h1>
-          <p className="text-gray-600 mt-1">إدارة تصنيفات ووسوم المقالات</p>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي التصنيفات</CardTitle>
-            <Tag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{categories.length}</div>
-            <p className="text-xs text-muted-foreground">+1 هذا الشهر</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الوسوم</CardTitle>
-            <Hash className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{tags.length}</div>
-            <p className="text-xs text-muted-foreground">+3 هذا الأسبوع</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">المقالات المصنفة</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {categories.reduce((sum, cat) => sum + cat.postsCount, 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">من إجمالي المقالات</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">الأكثر استخداماً</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {categories.sort((a, b) => b.postsCount - a.postsCount)[0]?.name.slice(0, 10)}...
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {categories.sort((a, b) => b.postsCount - a.postsCount)[0]?.postsCount} مقال
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('categories')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'categories'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              التصنيفات
+            </h1>
+            <Sparkles className="w-7 h-7 text-yellow-500 dark:text-yellow-400 animate-pulse" />
+          </div>
+          <Button 
+            className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+            style={{ borderRadius: '8px', boxShadow: 'none' }}
+            onClick={() => setShowAddModal(true)}
           >
-            التصنيفات ({categories.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('tags')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'tags'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            الوسوم ({tags.length})
-          </button>
-        </nav>
-      </div>
-
-      {/* Search and Add */}
-      <div className="flex justify-between items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <input
-            type="text"
-            placeholder={`البحث في ${activeTab === 'categories' ? 'التصنيفات' : 'الوسوم'}...`}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+            <Plus className="w-4 h-4" />
+            تصنيف جديد
+          </Button>
         </div>
-        <Button onClick={() => setShowAddForm(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          {activeTab === 'categories' ? 'تصنيف جديد' : 'وسم جديد'}
-        </Button>
+        <p className="text-gray-600 dark:text-gray-400">إدارة تصنيفات المقالات وتنظيم المحتوى</p>
       </div>
 
-      {/* Add/Edit Form */}
-      {showAddForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {editingItem ? 'تعديل' : 'إضافة'} {activeTab === 'categories' ? 'تصنيف' : 'وسم'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الاسم *
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  dir="rtl"
-                />
+                <p className="text-sm text-gray-600 dark:text-gray-400">إجمالي التصنيفات</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{categories.length}</p>
               </div>
+              <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <Tag className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الرابط المختصر
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  dir="ltr"
-                />
+                <p className="text-sm text-gray-600 dark:text-gray-400">إجمالي المقالات</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{categories.reduce((acc, cat) => acc + cat.posts, 0)}</p>
               </div>
-              {activeTab === 'categories' && (
-                <>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      الوصف
-                    </label>
-                    <textarea
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      rows={3}
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      dir="rtl"
-                    />
+              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">إجمالي المشاهدات</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{categories.reduce((acc, cat) => acc + cat.views, 0).toLocaleString()}</p>
+              </div>
+              <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search */}
+      <Card className="mb-6 bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+        <CardContent className="p-4">
+          <div className="relative">
+            <Tag className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="search"
+              placeholder="ابحث في التصنيفات..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-4 pr-10 py-2 text-sm bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+              style={{ border: '1px solid #f0f0ef' }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Categories Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredCategories.map((category) => (
+          <Card 
+            key={category.id}
+            className="bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+            style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+          >
+            <CardHeader className="pb-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-12 h-12 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: category.color + '20' }}
+                  >
+                    <Tag className="w-6 h-6" style={{ color: category.color }} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      اللون
-                    </label>
-                    <input
-                      type="color"
-                      className="w-full h-10 border border-gray-300 rounded-lg"
-                      value={formData.color}
-                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="flex gap-2 mt-4">
-              <Button onClick={editingItem ? handleUpdate : (activeTab === 'categories' ? handleAddCategory : handleAddTag)}>
-                {editingItem ? 'تحديث' : 'إضافة'}
-              </Button>
-              <Button variant="outline" onClick={resetForm}>
-                إلغاء
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Categories List */}
-      {activeTab === 'categories' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCategories.map((category) => (
-            <Card key={category.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: category.color }}
-                    />
-                    <CardTitle className="text-lg">{category.name}</CardTitle>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(category)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(category.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <CardTitle className="text-lg dark:text-gray-100">{category.name}</CardTitle>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{category.slug}</p>
                   </div>
                 </div>
-                <CardDescription>{category.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center text-sm text-gray-600">
-                  <span>{category.postsCount} مقال</span>
-                  <span>/{category.slug}</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem className="flex items-center gap-2">
+                      <Edit className="w-4 h-4" />
+                      تحرير
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <Trash2 className="w-4 h-4" />
+                      حذف
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{category.description}</p>
+              
+              <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid #f0f0ef' }}>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                    <FileText className="w-4 h-4" />
+                    {category.posts} مقال
+                  </span>
+                  <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                    <TrendingUp className="w-4 h-4" />
+                    {category.views.toLocaleString()} مشاهدة
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                <div className="flex items-center gap-1">
+                  <Palette className="w-4 h-4 text-gray-400" />
+                  <div 
+                    className="w-6 h-6 rounded-full"
+                    style={{ backgroundColor: category.color }}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-      {/* Tags List */}
-      {activeTab === 'tags' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>الوسوم ({filteredTags.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-right py-3 px-4 font-medium text-gray-900">الاسم</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-900">الرابط المختصر</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-900">عدد المقالات</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-900">الإجراءات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTags.map((tag) => (
-                    <tr key={tag.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-4 px-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          #{tag.name}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">
-                        /{tag.slug}
-                      </td>
-                      <td className="py-4 px-4 text-sm text-gray-900">
-                        {tag.postsCount}
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(tag)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(tag.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
+      {/* Add Category Modal (Placeholder) */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAddModal(false)}>
+          <Card 
+            className="w-full max-w-md bg-white dark:bg-gray-800 dark:border-gray-700"
+            style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardHeader>
+              <CardTitle className="dark:text-gray-100">إضافة تصنيف جديد</CardTitle>
+              <CardDescription className="dark:text-gray-400">أضف تصنيفاً جديداً لتنظيم المقالات</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">اسم التصنيف</label>
+                <input
+                  type="text"
+                  placeholder="مثال: الذكاء الاصطناعي التوليدي"
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">الوصف</label>
+                <textarea
+                  placeholder="وصف مختصر للتصنيف..."
+                  rows={3}
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">اللون</label>
+                <div className="flex gap-2">
+                  {['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899'].map((color) => (
+                    <button
+                      key={color}
+                      className="w-8 h-8 rounded-full border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
+                      style={{ backgroundColor: color }}
+                    />
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  style={{ borderRadius: '8px', boxShadow: 'none' }}
+                >
+                  إضافة التصنيف
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="flex-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-600"
+                  style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
+                  onClick={() => setShowAddModal(false)}
+                >
+                  إلغاء
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   )
 }
-

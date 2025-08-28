@@ -14,9 +14,17 @@ import {
   Tag,
   User,
   Globe,
-  FileText
+  FileText,
+  Sparkles
 } from 'lucide-react'
 import Link from 'next/link'
+import { IBM_Plex_Sans_Arabic } from "next/font/google"
+
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+})
 
 export default function NewPost() {
   const [title, setTitle] = useState('')
@@ -51,177 +59,178 @@ export default function NewPost() {
       excerpt,
       content,
       category,
-      tags: tags.split(',').map(tag => tag.trim()),
+      tags,
       featuredImage,
       status: saveStatus,
       publishDate,
-      metaTitle: metaTitle || title,
-      metaDescription: metaDescription || excerpt,
+      metaTitle,
+      metaDescription
     }
-    
     console.log('Saving post:', postData)
-    // هنا سيتم إرسال البيانات إلى API
-    alert(`تم ${saveStatus === 'published' ? 'نشر' : 'حفظ'} المقال بنجاح!`)
-  }
-
-  const handlePreview = () => {
-    // فتح معاينة في نافذة جديدة
-    window.open('/admin/posts/preview', '_blank')
+    // TODO: Implement save functionality
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`${ibmPlexArabic.className} bg-[#f8f8f7] dark:bg-[#1a1a1a] min-h-screen`}>
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" asChild>
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
             <Link href="/admin/posts">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              العودة للمقالات
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                العودة
+              </Button>
             </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">مقال جديد</h1>
-            <p className="text-gray-600 mt-1">إنشاء مقال جديد ونشره على الموقع</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              مقال جديد
+            </h1>
+            <Sparkles className="w-7 h-7 text-yellow-500 dark:text-yellow-400 animate-pulse" />
           </div>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handlePreview}>
-            <Eye className="h-4 w-4 mr-2" />
-            معاينة
-          </Button>
-          <Button variant="outline" onClick={() => handleSave('draft')}>
-            <Save className="h-4 w-4 mr-2" />
-            حفظ كمسودة
-          </Button>
-          <Button onClick={() => handleSave('published')}>
-            <Send className="h-4 w-4 mr-2" />
-            نشر المقال
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              className="gap-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-600"
+              style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
+              onClick={() => handleSave('draft')}
+            >
+              <Save className="w-4 h-4" />
+              حفظ كمسودة
+            </Button>
+            <Button 
+              variant="outline"
+              className="gap-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-600"
+              style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
+            >
+              <Eye className="w-4 h-4" />
+              معاينة
+            </Button>
+            <Button 
+              className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              style={{ borderRadius: '8px', boxShadow: 'none' }}
+              onClick={() => handleSave('published')}
+            >
+              <Send className="w-4 h-4" />
+              نشر
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Basic Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                معلومات المقال الأساسية
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          {/* Title & Basic Info */}
+          <Card 
+            className="bg-white dark:bg-gray-800 dark:border-gray-700"
+            style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+          >
+            <CardContent className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  عنوان المقال *
-                </label>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">عنوان المقال</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="أدخل عنوان المقال..."
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
-                  dir="rtl"
+                  className="w-full px-4 py-3 text-lg bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
+                  placeholder="أدخل عنوان المقال..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الرابط المختصر (Slug)
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="article-slug"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  dir="ltr"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  سيظهر في الرابط: /articles/{slug}
-                </p>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">الرابط الدائم</label>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">https://hekaya-ai.com/articles/</span>
+                  <input
+                    type="text"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                    style={{ border: '1px solid #f0f0ef' }}
+                    dir="ltr"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الملخص
-                </label>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">المقتطف</label>
                 <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="ملخص قصير عن المقال..."
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
-                  dir="rtl"
+                  rows={3}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
+                  placeholder="اكتب وصفاً مختصراً للمقال..."
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Content Editor */}
-          <Card>
+          <Card 
+            className="bg-white dark:bg-gray-800 dark:border-gray-700"
+            style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+          >
             <CardHeader>
-              <CardTitle>محتوى المقال</CardTitle>
-              <CardDescription>
-                استخدم المحرر المتقدم لكتابة وتنسيق محتوى المقال
-              </CardDescription>
+              <CardTitle className="dark:text-gray-100">محتوى المقال</CardTitle>
             </CardHeader>
             <CardContent>
-              <TiptapEditor
+              <TiptapEditor 
                 content={content}
                 onChange={setContent}
-                placeholder="ابدأ كتابة محتوى المقال هنا..."
+                placeholder="ابدأ بكتابة محتوى المقال..."
                 className="min-h-[500px]"
               />
             </CardContent>
           </Card>
 
           {/* SEO Settings */}
-          <Card>
+          <Card 
+            className="bg-white dark:bg-gray-800 dark:border-gray-700"
+            style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+          >
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 dark:text-gray-100">
+                <Globe className="w-5 h-5" />
                 إعدادات SEO
               </CardTitle>
-              <CardDescription>
-                تحسين المقال لمحركات البحث
+              <CardDescription className="dark:text-gray-400">
+                حسّن ظهور مقالك في محركات البحث
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  عنوان SEO
-                </label>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">عنوان SEO</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="عنوان محسن لمحركات البحث..."
                   value={metaTitle}
                   onChange={(e) => setMetaTitle(e.target.value)}
-                  dir="rtl"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
+                  placeholder={title || 'عنوان المقال في نتائج البحث'}
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  {metaTitle.length}/60 حرف (الموصى به: 50-60 حرف)
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {metaTitle.length || title.length}/60 حرف
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  وصف SEO
-                </label>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">وصف SEO</label>
                 <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="وصف محسن لمحركات البحث..."
                   value={metaDescription}
                   onChange={(e) => setMetaDescription(e.target.value)}
-                  dir="rtl"
+                  rows={3}
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
+                  placeholder={excerpt || 'وصف المقال في نتائج البحث'}
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  {metaDescription.length}/160 حرف (الموصى به: 150-160 حرف)
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {metaDescription.length || excerpt.length}/160 حرف
                 </p>
               </div>
             </CardContent>
@@ -231,22 +240,21 @@ export default function NewPost() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Publish Settings */}
-          <Card>
+          <Card 
+            className="bg-white dark:bg-gray-800 dark:border-gray-700"
+            style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+          >
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Send className="h-5 w-5" />
-                إعدادات النشر
-              </CardTitle>
+              <CardTitle className="dark:text-gray-100">إعدادات النشر</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  حالة المقال
-                </label>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">الحالة</label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
                 >
                   <option value="draft">مسودة</option>
                   <option value="published">منشور</option>
@@ -254,132 +262,110 @@ export default function NewPost() {
                 </select>
               </div>
 
-              {status === 'scheduled' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    تاريخ النشر
-                  </label>
-                  <input
-                    type="datetime-local"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    value={publishDate}
-                    onChange={(e) => setPublishDate(e.target.value)}
-                  />
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">تاريخ النشر</label>
+                <input
+                  type="datetime-local"
+                  value={publishDate}
+                  onChange={(e) => setPublishDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
+                />
+              </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الكاتب
-                </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option>د. سارة الأحمد</option>
-                  <option>أحمد محمد</option>
-                  <option>محمد علي</option>
-                </select>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">الكاتب</label>
+                <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg" style={{ border: '1px solid #f0f0ef' }}>
+                  <User className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm dark:text-gray-300">المدير</span>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Categories & Tags */}
-          <Card>
+          <Card 
+            className="bg-white dark:bg-gray-800 dark:border-gray-700"
+            style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+          >
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Tag className="h-5 w-5" />
-                التصنيف والوسوم
-              </CardTitle>
+              <CardTitle className="dark:text-gray-100">التصنيفات والوسوم</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  التصنيف
-                </label>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">التصنيف</label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
                 >
-                  <option value="">اختر التصنيف</option>
-                  <option value="ai">الذكاء الاصطناعي</option>
-                  <option value="medicine">الطب والتقنية</option>
-                  <option value="education">التعليم</option>
-                  <option value="business">الأعمال</option>
-                  <option value="ethics">الأخلاقيات</option>
+                  <option value="">اختر تصنيفاً</option>
+                  <option value="ai-medicine">الطب والصحة</option>
+                  <option value="ai-education">التعليم</option>
+                  <option value="ai-technology">التقنية</option>
+                  <option value="ai-industry">الصناعة</option>
+                  <option value="ai-business">الأعمال</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الوسوم
-                </label>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-300">الوسوم</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="وسم1، وسم2، وسم3"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
-                  dir="rtl"
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  style={{ border: '1px solid #f0f0ef' }}
+                  placeholder="وسوم مفصولة بفاصلة"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  افصل الوسوم بفاصلة
-                </p>
               </div>
             </CardContent>
           </Card>
 
           {/* Featured Image */}
-          <Card>
+          <Card 
+            className="bg-white dark:bg-gray-800 dark:border-gray-700"
+            style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+          >
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ImageIcon className="h-5 w-5" />
-                الصورة المميزة
-              </CardTitle>
+              <CardTitle className="dark:text-gray-100">الصورة المميزة</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <input
-                  type="url"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="رابط الصورة المميزة"
-                  value={featuredImage}
-                  onChange={(e) => setFeaturedImage(e.target.value)}
-                />
+            <CardContent>
+              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer" style={{ borderColor: '#f0f0ef' }}>
+                <ImageIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">اسحب الصورة هنا أو انقر للاختيار</p>
+                <p className="text-xs text-gray-500 dark:text-gray-500">PNG, JPG حتى 10MB</p>
               </div>
-              
-              {featuredImage && (
-                <div className="border border-gray-200 rounded-lg p-2">
-                  <img
-                    src={featuredImage}
-                    alt="معاينة الصورة المميزة"
-                    className="w-full h-32 object-cover rounded"
-                  />
-                </div>
-              )}
-
-              <Button variant="outline" className="w-full">
-                <ImageIcon className="h-4 w-4 mr-2" />
-                رفع صورة
-              </Button>
             </CardContent>
           </Card>
 
           {/* Quick Stats */}
-          <Card>
+          <Card 
+            className="bg-white dark:bg-gray-800 dark:border-gray-700"
+            style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+          >
             <CardHeader>
-              <CardTitle>إحصائيات سريعة</CardTitle>
+              <CardTitle className="dark:text-gray-100">إحصائيات سريعة</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>عدد الكلمات:</span>
-                <span>{content.replace(/<[^>]*>/g, '').split(' ').filter(word => word.length > 0).length}</span>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">عدد الكلمات</span>
+                <span className="text-sm font-bold dark:text-gray-100">
+                  {content.replace(/<[^>]*>/g, '').split(' ').filter(word => word.length > 0).length}
+                </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span>عدد الأحرف:</span>
-                <span>{content.replace(/<[^>]*>/g, '').length}</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">وقت القراءة المتوقع</span>
+                <span className="text-sm font-bold dark:text-gray-100">
+                  {Math.ceil(content.replace(/<[^>]*>/g, '').split(' ').filter(word => word.length > 0).length / 200)} دقائق
+                </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span>وقت القراءة المقدر:</span>
-                <span>{Math.ceil(content.replace(/<[^>]*>/g, '').split(' ').length / 200)} دقيقة</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">عدد الأحرف</span>
+                <span className="text-sm font-bold dark:text-gray-100">
+                  {content.replace(/<[^>]*>/g, '').length}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -388,4 +374,3 @@ export default function NewPost() {
     </div>
   )
 }
-

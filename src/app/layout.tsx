@@ -6,6 +6,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AuthProvider } from "@/components/providers/session-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { usePathname } from "next/navigation";
 
 const notoSansArabic = Noto_Sans_Arabic({
@@ -41,11 +42,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className={`min-h-screen bg-background font-sans antialiased ${notoSansArabic.variable}`}>
-        <AuthProvider>
-          <LayoutContent>{children}</LayoutContent>
-        </AuthProvider>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <body className={`min-h-screen bg-background font-sans antialiased ${notoSansArabic.variable}`} suppressHydrationWarning>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

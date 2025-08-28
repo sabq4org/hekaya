@@ -1,373 +1,367 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { 
   Plus, 
   Search, 
-  Filter, 
-  Edit, 
-  Eye, 
-  Trash2, 
-  MoreHorizontal,
+  Filter,
+  Eye,
+  MessageSquare,
   Calendar,
   User,
   Tag,
-  TrendingUp
+  Edit,
+  Trash2,
+  MoreVertical,
+  FileText,
+  CheckCircle,
+  Clock,
+  Sparkles
 } from 'lucide-react'
-import Link from 'next/link'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { IBM_Plex_Sans_Arabic } from "next/font/google"
 
-// Mock data - في التطبيق الحقيقي سيتم جلبها من API
-const mockPosts = [
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+})
+
+// Mock data
+const posts = [
   {
     id: '1',
     title: 'الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر',
     slug: 'ai-medical-diagnosis',
-    status: 'published',
     author: 'د. سارة الأحمد',
-    category: 'الطب والذكاء الاصطناعي',
-    publishedAt: '2025-08-28',
+    category: 'الطب والصحة',
+    status: 'published',
+    publishedAt: '2024-08-28',
     views: 1234,
     comments: 23,
-    excerpt: 'اكتشف كيف يحدث الذكاء الاصطناعي ثورة في التشخيص الطبي...'
+    image: '/images/ai-medical.jpg'
   },
   {
     id: '2',
     title: 'مستقبل الذكاء الاصطناعي في التعليم',
-    slug: 'ai-in-education',
-    status: 'published',
+    slug: 'future-of-ai-in-education',
     author: 'أحمد محمد',
-    category: 'التعليم والتقنية',
-    publishedAt: '2024-01-15',
-    views: 2156,
-    comments: 45,
-    excerpt: 'كيف يمكن للذكاء الاصطناعي أن يحدث ثورة في طرق التعلم...'
-  },
-  {
-    id: '3',
-    title: 'أخلاقيات الذكاء الاصطناعي في العصر الحديث',
-    slug: 'ai-ethics',
+    category: 'التعليم',
     status: 'draft',
-    author: 'سارة أحمد',
-    category: 'الأخلاقيات',
     publishedAt: null,
     views: 0,
     comments: 0,
-    excerpt: 'نقاش حول التحديات الأخلاقية التي يطرحها تطور الذكاء الاصطناعي...'
+    image: '/images/ai-education.jpg'
+  },
+  {
+    id: '3',
+    title: 'أخلاقيات الذكاء الاصطناعي في العصر الرقمي',
+    slug: 'ai-ethics',
+    author: 'د. فاطمة الزهراء',
+    category: 'التقنية',
+    status: 'published',
+    publishedAt: '2024-01-10',
+    views: 2542,
+    comments: 45,
+    image: '/images/ai-ethics.jpg'
   },
   {
     id: '4',
-    title: 'الذكاء الاصطناعي في خدمة العملاء',
-    slug: 'ai-customer-service',
+    title: 'التعلم العميق وتطبيقاته في معالجة الصور',
+    slug: 'deep-learning-image-processing',
+    author: 'م. خالد العمري',
+    category: 'التقنية',
+    status: 'published',
+    publishedAt: '2024-01-05',
+    views: 1876,
+    comments: 31,
+    image: '/images/deep-learning.jpg'
+  },
+  {
+    id: '5',
+    title: 'الروبوتات الذكية في الصناعة',
+    slug: 'smart-robots-industry',
+    author: 'د. ليلى حسن',
+    category: 'الصناعة',
     status: 'scheduled',
-    author: 'محمد علي',
-    category: 'الأعمال والتقنية',
-    publishedAt: '2025-09-01',
+    publishedAt: '2024-02-01',
     views: 0,
     comments: 0,
-    excerpt: 'كيف تحول الشات بوت تجربة المستخدم وتحسن من كفاءة خدمة العملاء...'
+    image: '/images/robots.jpg'
   }
 ]
 
-const statusColors = {
-  published: 'bg-green-100 text-green-800',
-  draft: 'bg-yellow-100 text-yellow-800',
-  scheduled: 'bg-blue-100 text-blue-800',
-  archived: 'bg-gray-100 text-gray-800'
-}
-
-const statusLabels = {
-  published: 'منشور',
-  draft: 'مسودة',
-  scheduled: 'مجدول',
-  archived: 'مؤرشف'
-}
-
-export default function PostsManagement() {
-  const [posts, setPosts] = useState(mockPosts)
+export default function PostsPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.author.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || post.status === statusFilter
-    const matchesCategory = categoryFilter === 'all' || post.category === categoryFilter
-    
-    return matchesSearch && matchesStatus && matchesCategory
+    const matchesStatus = filterStatus === 'all' || post.status === filterStatus
+    return matchesSearch && matchesStatus
   })
 
-  const categories = [...new Set(posts.map(post => post.category))]
-
-  const handleDeletePost = (postId: string) => {
-    if (confirm('هل أنت متأكد من حذف هذا المقال؟')) {
-      setPosts(posts.filter(post => post.id !== postId))
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'published':
+        return <span className="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+          <CheckCircle className="w-3 h-3" />
+          منشور
+        </span>
+      case 'draft':
+        return <span className="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
+          <Clock className="w-3 h-3" />
+          مسودة
+        </span>
+      case 'scheduled':
+        return <span className="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+          <Calendar className="w-3 h-3" />
+          مجدول
+        </span>
+      default:
+        return null
     }
   }
 
-  const handleStatusChange = (postId: string, newStatus: string) => {
-    setPosts(posts.map(post => 
-      post.id === postId ? { ...post, status: newStatus } : post
-    ))
-  }
-
   return (
-    <div className="space-y-6">
+    <div className={`${ibmPlexArabic.className} bg-[#f8f8f7] dark:bg-[#1a1a1a] min-h-screen`}>
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">إدارة المقالات</h1>
-          <p className="text-gray-600 mt-1">إدارة وتحرير جميع مقالات الموقع</p>
-        </div>
-        <Button asChild>
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              المقالات
+            </h1>
+            <Sparkles className="w-7 h-7 text-yellow-500 dark:text-yellow-400 animate-pulse" />
+          </div>
           <Link href="/admin/posts/new">
-            <Plus className="h-4 w-4 mr-2" />
-            مقال جديد
+            <Button className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" style={{ borderRadius: '8px', boxShadow: 'none' }}>
+              <Plus className="w-4 h-4" />
+              مقال جديد
+            </Button>
           </Link>
-        </Button>
+        </div>
+        <p className="text-gray-600 dark:text-gray-400">إدارة وتحرير جميع المقالات المنشورة والمسودات</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المقالات</CardTitle>
-            <Edit className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{posts.length}</div>
-            <p className="text-xs text-muted-foreground">+2 هذا الشهر</p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">إجمالي المقالات</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{posts.length}</p>
+              </div>
+              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">المقالات المنشورة</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {posts.filter(p => p.status === 'published').length}
+        
+        <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">المقالات المنشورة</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{posts.filter(p => p.status === 'published').length}</p>
+              </div>
+              <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">+1 هذا الأسبوع</p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">المسودات</CardTitle>
-            <Edit className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {posts.filter(p => p.status === 'draft').length}
+        
+        <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">المسودات</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{posts.filter(p => p.status === 'draft').length}</p>
+              </div>
+              <div className="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">تحتاج مراجعة</p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المشاهدات</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {posts.reduce((sum, post) => sum + post.views, 0).toLocaleString()}
+        
+        <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">إجمالي المشاهدات</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{posts.reduce((acc, p) => acc + p.views, 0).toLocaleString()}</p>
+              </div>
+              <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <Eye className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">+12% من الشهر الماضي</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>البحث والفلترة</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className="mb-6 bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+        <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <input
-                  type="text"
-                  placeholder="البحث في المقالات..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+            <div className="relative flex-1">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="search"
+                placeholder="ابحث في المقالات..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-4 pr-10 py-2 text-sm bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                style={{ border: '1px solid #f0f0ef' }}
+              />
             </div>
-            
-            <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">جميع الحالات</option>
-              <option value="published">منشور</option>
-              <option value="draft">مسودة</option>
-              <option value="scheduled">مجدول</option>
-              <option value="archived">مؤرشف</option>
-            </select>
-
-            <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            >
-              <option value="all">جميع التصنيفات</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Posts Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>المقالات ({filteredPosts.length})</CardTitle>
-          <CardDescription>
-            قائمة بجميع المقالات مع إمكانية التحرير والإدارة
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-right py-3 px-4 font-medium text-gray-900">العنوان</th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-900">الكاتب</th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-900">التصنيف</th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-900">الحالة</th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-900">تاريخ النشر</th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-900">المشاهدات</th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-900">التعليقات</th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-900">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPosts.map((post) => (
-                  <tr key={post.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 px-4">
-                      <div>
-                        <div className="font-medium text-gray-900 line-clamp-1">
-                          {post.title}
-                        </div>
-                        <div className="text-sm text-gray-500 line-clamp-1 mt-1">
-                          {post.excerpt}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-900">{post.author}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">{post.category}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[post.status as keyof typeof statusColors]}`}>
-                        {statusLabels[post.status as keyof typeof statusLabels]}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('ar-SA') : '-'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-900">{post.views.toLocaleString()}</span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-900">{post.comments}</span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                        >
-                          <Link href={`/articles/${post.slug}`} target="_blank">
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                        >
-                          <Link href={`/admin/posts/${post.id}/edit`}>
-                            <Edit className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeletePost(post.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredPosts.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-500 mb-4">لا توجد مقالات تطابق معايير البحث</div>
-              <Button asChild>
-                <Link href="/admin/posts/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  إنشاء مقال جديد
-                </Link>
+            <div className="flex gap-2">
+              <Button
+                variant={filterStatus === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterStatus('all')}
+                className={filterStatus === 'all' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
+                style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
+              >
+                الكل
+              </Button>
+              <Button
+                variant={filterStatus === 'published' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterStatus('published')}
+                className={filterStatus === 'published' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
+                style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
+              >
+                منشور
+              </Button>
+              <Button
+                variant={filterStatus === 'draft' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterStatus('draft')}
+                className={filterStatus === 'draft' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
+                style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
+              >
+                مسودة
+              </Button>
+              <Button
+                variant={filterStatus === 'scheduled' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterStatus('scheduled')}
+                className={filterStatus === 'scheduled' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
+                style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
+              >
+                مجدول
               </Button>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>إجراءات سريعة</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-20 flex-col">
-              <Plus className="h-6 w-6 mb-2" />
-              مقال جديد
-            </Button>
-            <Button variant="outline" className="h-20 flex-col">
-              <Filter className="h-6 w-6 mb-2" />
-              إدارة التصنيفات
-            </Button>
-            <Button variant="outline" className="h-20 flex-col">
-              <TrendingUp className="h-6 w-6 mb-2" />
-              تقارير الأداء
-            </Button>
+      {/* Posts List */}
+      <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+        <CardContent className="p-0">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {filteredPosts.map((post) => (
+              <div key={post.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div className="flex items-start gap-4">
+                  {/* Thumbnail */}
+                  <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-lg shrink-0 overflow-hidden">
+                    {post.image && (
+                      <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-lg font-semibold dark:text-gray-100">
+                            <Link href={`/admin/posts/${post.id}/edit`} className="hover:text-purple-600 dark:hover:text-purple-400">
+                              {post.title}
+                            </Link>
+                          </h3>
+                          {getStatusBadge(post.status)}
+                        </div>
+                        
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <User className="w-4 h-4" />
+                            {post.author}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Tag className="w-4 h-4" />
+                            {post.category}
+                          </span>
+                          {post.publishedAt && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {new Date(post.publishedAt).toLocaleDateString('ar-SA')}
+                            </span>
+                          )}
+                          {post.status === 'published' && (
+                            <>
+                              <span className="flex items-center gap-1">
+                                <Eye className="w-4 h-4" />
+                                {post.views.toLocaleString()}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MessageSquare className="w-4 h-4" />
+                                {post.comments}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Actions */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/posts/${post.id}/edit`} className="flex items-center gap-2">
+                              <Edit className="w-4 h-4" />
+                              تحرير
+                            </Link>
+                          </DropdownMenuItem>
+                          {post.status === 'published' && (
+                            <DropdownMenuItem asChild>
+                              <Link href={`/articles/${post.slug}`} className="flex items-center gap-2">
+                                <Eye className="w-4 h-4" />
+                                عرض
+                              </Link>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                            <Trash2 className="w-4 h-4" />
+                            حذف
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
     </div>
   )
 }
-

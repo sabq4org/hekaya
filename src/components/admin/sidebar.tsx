@@ -1,101 +1,165 @@
-"use client"
+'use client'
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
-import {
-  LayoutDashboard,
-  FileText,
-  Tags,
-  MessageSquare,
-  Users,
-  Settings,
-  BarChart3,
-  Image,
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { 
+  Home, 
+  FileText, 
+  MessageSquare, 
+  Users, 
+  BarChart3, 
+  Settings, 
+  Tag,
+  Image as ImageIcon,
   Mail,
-  Search,
-} from "lucide-react"
+  LogOut,
+  Sparkles,
+  Plus
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { IBM_Plex_Sans_Arabic } from "next/font/google"
 
-const sidebarItems = [
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+})
+
+interface NavItem {
+  label: string
+  href: string
+  icon: React.ReactNode
+  badge?: string
+}
+
+const navItems: NavItem[] = [
   {
-    title: "نظرة عامة",
-    href: "/admin",
-    icon: LayoutDashboard,
+    label: 'نظرة عامة',
+    href: '/admin',
+    icon: <Home className="w-5 h-5" />
   },
   {
-    title: "المقالات",
-    href: "/admin/posts",
-    icon: FileText,
+    label: 'المقالات',
+    href: '/admin/posts',
+    icon: <FileText className="w-5 h-5" />
   },
   {
-    title: "التصنيفات",
-    href: "/admin/categories",
-    icon: Tags,
+    label: 'التعليقات',
+    href: '/admin/comments',
+    icon: <MessageSquare className="w-5 h-5" />,
+    badge: '3'
   },
   {
-    title: "التعليقات",
-    href: "/admin/comments",
-    icon: MessageSquare,
+    label: 'التصنيفات',
+    href: '/admin/categories',
+    icon: <Tag className="w-5 h-5" />
   },
   {
-    title: "الوسائط",
-    href: "/admin/media",
-    icon: Image,
+    label: 'التحليلات',
+    href: '/admin/analytics',
+    icon: <BarChart3 className="w-5 h-5" />
   },
   {
-    title: "المستخدمون",
-    href: "/admin/users",
-    icon: Users,
+    label: 'المستخدمون',
+    href: '/admin/users',
+    icon: <Users className="w-5 h-5" />
   },
   {
-    title: "التحليلات",
-    href: "/admin/analytics",
-    icon: BarChart3,
+    label: 'الوسائط',
+    href: '/admin/media',
+    icon: <ImageIcon className="w-5 h-5" />
   },
   {
-    title: "النشرة البريدية",
-    href: "/admin/newsletter",
-    icon: Mail,
+    label: 'النشرة البريدية',
+    href: '/admin/newsletter',
+    icon: <Mail className="w-5 h-5" />
   },
   {
-    title: "البحث",
-    href: "/admin/search",
-    icon: Search,
-  },
-  {
-    title: "الإعدادات",
-    href: "/admin/settings",
-    icon: Settings,
-  },
+    label: 'الإعدادات',
+    href: '/admin/settings',
+    icon: <Settings className="w-5 h-5" />
+  }
 ]
 
 export function AdminSidebar() {
   const pathname = usePathname()
 
+  const handleLogout = () => {
+    document.cookie = 'auth-token=; max-age=0; path=/';
+    window.location.href = '/admin/login';
+  }
+
   return (
-    <div className="w-64 border-l bg-muted/10">
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
-          <div className="space-y-1">
-            {sidebarItems.map((item) => (
+    <aside className={`${ibmPlexArabic.className} w-64 bg-white dark:bg-gray-800 h-screen sticky top-0`} style={{ borderLeft: '1px solid #f0f0ef' }}>
+      <div className="p-6">
+        {/* Logo */}
+        <div className="mb-8">
+          <Link href="/admin" className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              حكاية AI
+            </h2>
+            <Sparkles className="w-6 h-6 text-yellow-500 dark:text-yellow-400 animate-pulse" />
+          </Link>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">لوحة التحكم</p>
+        </div>
+
+        {/* New Post Button */}
+        <Link href="/admin/posts/new" className="block mb-6">
+          <Button 
+            className="w-full gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+            style={{ borderRadius: '8px', boxShadow: 'none' }}
+          >
+            <Plus className="w-4 h-4" />
+            مقال جديد
+          </Button>
+        </Link>
+
+        {/* Navigation */}
+        <nav className="space-y-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
+            
+            return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
-                  pathname === item.href
-                    ? "bg-accent text-accent-foreground"
-                    : "transparent"
-                )}
+                className={`
+                  flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
+                  ${isActive 
+                    ? 'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-700 text-purple-600 dark:text-purple-400' 
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }
+                `}
               >
-                <item.icon className="ml-3 h-4 w-4" />
-                {item.title}
+                <div className="flex items-center gap-3">
+                  <div className={isActive ? 'text-purple-600 dark:text-purple-400' : ''}>
+                    {item.icon}
+                  </div>
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
-            ))}
-          </div>
+            )
+          })}
+        </nav>
+
+        {/* Logout Button */}
+        <div className="mt-8 pt-8" style={{ borderTop: '1px solid #f0f0ef' }}>
+          <Button 
+            onClick={handleLogout}
+            variant="outline" 
+            className="w-full gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900 dark:hover:text-red-300"
+            style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
+          >
+            <LogOut className="w-4 h-4" />
+            تسجيل الخروج
+          </Button>
         </div>
       </div>
-    </div>
+    </aside>
   )
 }
-

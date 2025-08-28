@@ -1,74 +1,110 @@
+'use client'
+
 import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { 
+  ArrowLeft, 
+  Calendar, 
+  Clock, 
+  Eye, 
+  User,
+  Share2,
+  Bookmark,
+  Cpu,
+  ChevronRight,
+  Brain,
+  Activity,
+  Heart,
+  Stethoscope,
+  TrendingUp
+} from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { IBM_Plex_Sans_Arabic } from "next/font/google"
 
-export const metadata: Metadata = {
-  title: 'الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر | حكاية AI',
-  description: 'اكتشف كيف يحدث الذكاء الاصطناعي ثورة في التشخيص الطبي، من الكشف المبكر عن السرطان إلى تشخيص أمراض العيون بدقة تفوق 97%. تعرف على التطبيقات العملية والتحديات والمستقبل.',
-  keywords: 'الذكاء الاصطناعي, التشخيص الطبي, الكشف المبكر, التعلم العميق, الطب الرقمي, تقنيات طبية, الرعاية الصحية',
-  openGraph: {
-    title: 'الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر',
-    description: 'اكتشف كيف يحدث الذكاء الاصطناعي ثورة في التشخيص الطبي والكشف المبكر عن الأمراض',
-    images: ['/images/ai-medical-diagnosis.jpg'],
-    type: 'article',
-    publishedTime: '2025-08-28T10:00:00.000Z',
-    authors: ['د. سارة الأحمد'],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر',
-    description: 'اكتشف كيف يحدث الذكاء الاصطناعي ثورة في التشخيص الطبي والكشف المبكر عن الأمراض',
-    images: ['/images/ai-medical-diagnosis.jpg'],
-  },
-}
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+})
+
+// export const metadata: Metadata = {
+//   title: 'الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر | حكاية AI',
+//   description: 'اكتشف كيف يحدث الذكاء الاصطناعي ثورة في التشخيص الطبي، من الكشف المبكر عن السرطان إلى تشخيص أمراض العيون بدقة تفوق 97%.',
+// }
 
 export default function MedicalAIDiagnosisArticle() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${ibmPlexArabic.className} bg-[#f8f8f7] dark:bg-[#1a1a1a]`}>
       {/* Article Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="mb-6">
-            <Link href="/articles" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              ← العودة للمقالات
+      <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-8">
+          <nav className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <Link href="/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+              الرئيسية
             </Link>
+            <ChevronRight className="w-4 h-4" />
+            <Link href="/blog" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+              المقالات
+            </Link>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-gray-900 dark:text-gray-100">الذكاء الاصطناعي في التشخيص الطبي</span>
+          </nav>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
+          {/* Article Meta */}
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 bg-gray-100 dark:bg-gray-800" style={{ borderRadius: '20px' }}>
+              <Cpu className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span className="text-sm font-medium text-purple-600 dark:text-purple-400">الطب والذكاء الاصطناعي</span>
           </div>
           
-          <div className="mb-6">
-            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-4">
-              الذكاء الاصطناعي
-            </span>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
+            <h1 className="text-3xl lg:text-5xl font-bold mb-6 leading-tight bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر
             </h1>
-          </div>
 
-          <div className="flex items-center gap-6 text-sm text-gray-600 mb-8">
+            <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400 pb-6 dark:border-gray-700" style={{ borderBottom: '1px solid #f0f0ef' }}>
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-medium">س</span>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: '#8b5cf6' }}>
+                  س
               </div>
               <div>
-                <p className="font-medium text-gray-900">د. سارة الأحمد</p>
-                <p className="text-gray-600">أخصائية الذكاء الاصطناعي الطبي</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">د. سارة الأحمد</p>
+                  <p className="text-xs">أخصائية الذكاء الاصطناعي الطبي</p>
+                </div>
               </div>
+              
+              <div className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                <span>28 أغسطس 2024</span>
             </div>
-            <div className="flex items-center gap-4">
-              <span>28 أغسطس 2025</span>
-              <span>•</span>
+              
+              <div className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
               <span>8 دقائق قراءة</span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
-                </svg>
-                1,234 مشاهدة
-              </span>
+              </div>
+              
+              <div className="flex items-center gap-1">
+                <Eye className="w-4 h-4" />
+                <span>1,234 مشاهدة</span>
+              </div>
+
+              <div className="mr-auto flex gap-2">
+                <Button variant="outline" size="sm" className="dark:border-gray-700 dark:text-gray-300" style={{ border: '1px solid #f0f0ef', borderRadius: '8px' }}>
+                  <Share2 className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" size="sm" className="dark:border-gray-700 dark:text-gray-300" style={{ border: '1px solid #f0f0ef', borderRadius: '8px' }}>
+                  <Bookmark className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
-          <div className="relative h-96 rounded-lg overflow-hidden mb-8">
+          {/* Featured Image */}
+          <div className="relative h-96 lg:h-[500px] overflow-hidden mb-12" style={{ borderRadius: '12px' }}>
             <Image
               src="/images/ai-medical-diagnosis.jpg"
               alt="الذكاء الاصطناعي في التشخيص الطبي"
@@ -76,319 +112,245 @@ export default function MedicalAIDiagnosisArticle() {
               className="object-cover"
               priority
             />
-          </div>
-        </div>
       </div>
 
       {/* Article Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed">
-            
-            <div className="bg-blue-50 border-r-4 border-blue-400 p-6 mb-8">
-              <p className="text-blue-800 font-medium mb-2">ملخص المقال</p>
-              <p className="text-blue-700">
+          <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+            <CardContent className="p-8 lg:p-12">
+              <div className="prose prose-lg max-w-none">
+                
+                {/* Summary Box */}
+                <div className="p-6 mb-8" className="bg-gray-50 dark:bg-gray-900" style={{ borderRight: '4px solid #8b5cf6', borderRadius: '8px' }}>
+                  <p className="font-bold text-purple-600 dark:text-purple-400 mb-3">ملخص المقال</p>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 يستكشف هذا المقال كيف يحدث الذكاء الاصطناعي ثورة حقيقية في مجال التشخيص الطبي، من خلال تحقيق دقة تشخيصية تصل إلى 97% في بعض التطبيقات، وتمكين الكشف المبكر عن الأمراض قبل ظهور الأعراض. نناقش التطبيقات العملية في مختلف التخصصات الطبية، والتحديات المواجهة، ونستشرف مستقبل الطب الرقمي.
               </p>
             </div>
 
-            <h2>مقدمة: عندما تلتقي التقنية بالطب</h2>
+                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">مقدمة: عندما تلتقي التقنية بالطب</h2>
             
-            <p>
+                <p className="text-gray-700 leading-relaxed mb-6">
               في عالم يتسارع فيه التطور التقني بوتيرة مذهلة، يبرز الذكاء الاصطناعي كأحد أهم الابتكارات التي تعيد تشكيل مجال الرعاية الصحية. فبينما كان التشخيص الطبي يعتمد تقليدياً على خبرة الأطباء وحدسهم الطبي، نشهد اليوم ثورة حقيقية تدمج بين الذكاء البشري والذكاء الاصطناعي لتحقيق دقة تشخيصية لم تكن ممكنة من قبل.
             </p>
 
-            <p>
-              إن الكشف المبكر عن الأمراض ليس مجرد هدف طبي، بل ضرورة حيوية تنقذ الأرواح وتقلل من معاناة المرضى. وهنا يأتي دور الذكاء الاصطناعي ليس كبديل للطبيب، بل كشريك ذكي يعزز قدراته التشخيصية ويفتح آفاقاً جديدة في عالم الطب الدقيق.
-            </p>
+                <h2 className="text-2xl font-bold mb-4 text-gray-900 mt-8">التطبيقات الرئيسية للذكاء الاصطناعي في التشخيص</h2>
 
-            <h2>التطور التاريخي: من الحدس إلى البيانات</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+                  <Card style={{ border: '1px solid #f0f0ef', backgroundColor: '#f8f8f7', borderRadius: '8px' }}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-full" style={{ backgroundColor: '#f0f0ef' }}>
+                          <Brain className="w-6 h-6 text-purple-600" />
+                        </div>
+                        <h3 className="font-bold text-lg">تشخيص السرطان</h3>
+                      </div>
+                      <p className="text-gray-600">
+                        دقة تصل إلى 95% في الكشف المبكر عن سرطان الثدي والرئة من خلال تحليل الصور الطبية.
+                      </p>
+                    </CardContent>
+                  </Card>
 
-            <h3>البدايات المتواضعة</h3>
-            <p>
-              بدأت رحلة الذكاء الاصطناعي في الطب في ستينيات القرن الماضي مع أنظمة بسيطة مثل &ldquo;MYCIN&rdquo; لتشخيص الالتهابات البكتيرية. كانت هذه الأنظمة تعتمد على قواعد منطقية بسيطة، لكنها وضعت الأساس لما نشهده اليوم من تطورات مذهلة.
-            </p>
-
-            <h3>الثورة الرقمية</h3>
-            <p>
-              مع ظهور التصوير الطبي الرقمي في التسعينيات، بدأت إمكانيات جديدة تتفتح أمام الذكاء الاصطناعي. فالصور الرقمية وفرت بيانات يمكن للحاسوب تحليلها بطرق لم تكن ممكنة مع الأفلام التقليدية.
-            </p>
-
-            <h3>عصر التعلم العميق</h3>
-            <p>
-              الطفرة الحقيقية جاءت مع تطوير تقنيات التعلم العميق في العقد الماضي. فجأة، أصبحت الآلات قادرة على &ldquo;رؤية&rdquo; الأنماط في الصور الطبية بدقة تضاهي، وأحياناً تفوق، دقة الأطباء المتخصصين.
-            </p>
-
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 my-8">
-              <h4 className="text-green-800 font-semibold mb-3">💡 هل تعلم؟</h4>
-              <p className="text-green-700">
-                أن أنظمة الذكاء الاصطناعي الحديثة يمكنها تحليل صورة أشعة مقطعية كاملة في أقل من 30 ثانية، بينما يحتاج الطبيب المتخصص إلى 15-30 دقيقة لنفس المهمة؟
-              </p>
+                  <Card style={{ border: '1px solid #f0f0ef', backgroundColor: '#f8f8f7', borderRadius: '8px' }}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-full" style={{ backgroundColor: '#f0f0ef' }}>
+                          <Activity className="w-6 h-6 text-purple-600" />
+                        </div>
+                        <h3 className="font-bold text-lg">أمراض القلب</h3>
             </div>
+                      <p className="text-gray-600">
+                        التنبؤ بالنوبات القلبية قبل حدوثها بـ 5 سنوات من خلال تحليل البيانات الصحية.
+                      </p>
+                    </CardContent>
+                  </Card>
 
-            <h2>كيف يعمل الذكاء الاصطناعي في التشخيص؟</h2>
-
-            <h3>الشبكات العصبية الاصطناعية</h3>
-            <p>
-              تعمل أنظمة التشخيص بالذكاء الاصطناعي على مبدأ محاكاة طريقة عمل الدماغ البشري. الشبكات العصبية الاصطناعية تتكون من طبقات متعددة من &ldquo;العصبونات&rdquo; الرقمية التي تعالج المعلومات بطريقة متوازية ومعقدة.
-            </p>
-
-            <h3>عملية التدريب</h3>
-            <ol>
-              <li><strong>جمع البيانات</strong>: يتم تجميع آلاف أو ملايين الصور الطبية المشخصة مسبقاً</li>
-              <li><strong>التعلم</strong>: النظام يتعلم من هذه الأمثلة، محدداً الأنماط المرتبطة بكل حالة</li>
-              <li><strong>التحسين</strong>: خلال عملية التدريب، يحسن النظام من دقته تدريجياً</li>
-              <li><strong>التطبيق</strong>: بعد التدريب، يصبح النظام قادراً على تحليل صور جديدة</li>
-            </ol>
-
-            <h2>التطبيقات الثورية في مختلف التخصصات</h2>
-
-            <h3>طب العيون: نافذة على المستقبل</h3>
-
-            <h4>تشخيص اعتلال الشبكية السكري</h4>
-            <p>
-              يعتبر اعتلال الشبكية السكري من أخطر مضاعفات مرض السكري، وقد حقق الذكاء الاصطناعي نجاحاً باهراً في هذا المجال:
-            </p>
-            <ul>
-              <li><strong>دقة التشخيص</strong>: تصل إلى 97% في الكشف عن اعتلال الشبكية</li>
-              <li><strong>السرعة</strong>: تحليل الصورة في ثوانٍ معدودة مقابل دقائق للطبيب</li>
-              <li><strong>الوصول</strong>: إمكانية الفحص في المناطق النائية عبر التطبيقات المحمولة</li>
-            </ul>
-
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 my-8">
-              <h4 className="text-yellow-800 font-semibold mb-3">📊 إحصائية مهمة</h4>
-              <p className="text-yellow-700">
-                <strong>97.8%</strong> دقة في كشف اعتلال الشبكية السكري مقابل <strong>91%</strong> للأطباء المتخصصين، مما يعني إنقاذ آلاف المرضى من فقدان البصر سنوياً.
-              </p>
+                  <Card style={{ border: '1px solid #f0f0ef', backgroundColor: '#f8f8f7', borderRadius: '8px' }}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-full" style={{ backgroundColor: '#f0f0ef' }}>
+                          <Eye className="w-6 h-6 text-purple-600" />
             </div>
-
-            <h3>الأشعة: عين ثالثة لا تخطئ</h3>
-
-            <h4>تشخيص السرطان</h4>
-            <p>في مجال الأورام، يحقق الذكاء الاصطناعي إنجازات مذهلة:</p>
-
-            <div className="grid md:grid-cols-3 gap-6 my-8">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h5 className="font-semibold text-blue-800 mb-2">سرطان الثدي</h5>
-                <ul className="text-blue-700 text-sm space-y-1">
-                  <li>• دقة 94.5% في تحليل الماموجرام</li>
-                  <li>• تقليل الإيجابيات الكاذبة بـ 5.7%</li>
-                  <li>• تقليل السلبيات الكاذبة بـ 9.4%</li>
-                </ul>
+                        <h3 className="font-bold text-lg">أمراض العيون</h3>
               </div>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h5 className="font-semibold text-green-800 mb-2">سرطان الرئة</h5>
-                <ul className="text-green-700 text-sm space-y-1">
-                  <li>• كشف العقد الصغيرة (&lt;3 مم)</li>
-                  <li>• تحديد احتمالية الخبث</li>
-                  <li>• تقليل الخزعات غير الضرورية</li>
-                </ul>
+                      <p className="text-gray-600">
+                        تشخيص اعتلال الشبكية السكري بدقة 97% مما يساعد في منع فقدان البصر.
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card style={{ border: '1px solid #f0f0ef', backgroundColor: '#f8f8f7', borderRadius: '8px' }}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-full" style={{ backgroundColor: '#f0f0ef' }}>
+                          <Stethoscope className="w-6 h-6 text-purple-600" />
               </div>
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <h5 className="font-semibold text-purple-800 mb-2">سرطان الجلد</h5>
-                <ul className="text-purple-700 text-sm space-y-1">
-                  <li>• تحليل الشامات والآفات</li>
-                  <li>• دقة تضاهي المتخصصين</li>
-                  <li>• فحص ذاتي عبر الهاتف</li>
-                </ul>
+                        <h3 className="font-bold text-lg">الأمراض النادرة</h3>
               </div>
+                      <p className="text-gray-600">
+                        تحديد الأمراض النادرة التي قد يستغرق تشخيصها سنوات بالطرق التقليدية.
+                      </p>
+                    </CardContent>
+                  </Card>
             </div>
 
-            <h2>الفوائد الثورية للذكاء الاصطناعي</h2>
+                <h2 className="text-2xl font-bold mb-4 text-gray-900 mt-8">كيف يعمل الذكاء الاصطناعي في التشخيص الطبي؟</h2>
 
-            <h3>الدقة المتناهية</h3>
-            <p>
-              إن أهم ما يميز الذكاء الاصطناعي هو قدرته على تحليل كميات هائلة من البيانات بدقة متناهية. بينما قد يفوت الطبيب البشري تفصيلاً دقيقاً في صورة طبية، فإن الذكاء الاصطناعي يفحص كل بكسل بعناية فائقة.
-            </p>
+                <p className="text-gray-700 leading-relaxed mb-6">
+                  يعتمد الذكاء الاصطناعي في التشخيص الطبي على تقنيات التعلم العميق (Deep Learning) والشبكات العصبية الاصطناعية (Neural Networks) التي تحاكي طريقة عمل الدماغ البشري. يتم تدريب هذه النماذج على ملايين الصور والبيانات الطبية، مما يمكنها من:
+                </p>
 
-            <h3>السرعة الفائقة</h3>
-            <p>الوقت عامل حاسم في الطب، والذكاء الاصطناعي يوفر سرعة لا مثيل لها:</p>
-            <ul>
-              <li>تحليل صورة الأشعة المقطعية في 30 ثانية</li>
-              <li>فحص مئات الشرائح المجهرية في دقائق</li>
-              <li>تقديم التشخيص الأولي فور التصوير</li>
-            </ul>
-
-            <h2>قصص نجاح ملهمة</h2>
-
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 my-8">
-              <h4 className="font-semibold text-gray-800 mb-3">🌟 قصة مارك: إنقاذ البصر في اللحظة الأخيرة</h4>
-              <p className="text-gray-700">
-                مارك، مهندس في الأربعينيات من عمره، كان يعاني من مرض السكري لسنوات. خلال فحص روتيني في عيادة صغيرة في ريف كاليفورنيا، استخدم الطبيب نظام ذكاء اصطناعي لفحص شبكية العين. اكتشف النظام علامات مبكرة لاعتلال الشبكية السكري لم تكن واضحة للعين المجردة.
-              </p>
-              <p className="text-gray-700 mt-2">
-                بفضل هذا الكشف المبكر، تمكن مارك من تلقي العلاج في الوقت المناسب، منقذاً بصره من فقدان محتمل. يقول مارك: &ldquo;لولا هذه التقنية، لما اكتشفت المشكلة إلا بعد فوات الأوان.&rdquo;
-              </p>
-            </div>
-
-            <h2>التحديات والعقبات</h2>
-
-            <h3>جودة البيانات</h3>
-            <p>نجاح الذكاء الاصطناعي يعتمد بشكل كبير على جودة البيانات المستخدمة في التدريب:</p>
-            
-            <div className="grid md:grid-cols-2 gap-6 my-6">
-              <div>
-                <h4 className="font-semibold text-red-600 mb-2">التحديات:</h4>
-                <ul className="text-gray-700 space-y-1">
-                  <li>• التحيز في البيانات</li>
-                  <li>• جودة الصور المنخفضة</li>
-                  <li>• التوسيم الخاطئ</li>
+                <ul className="list-disc list-inside text-gray-700 space-y-3 mr-6 mb-6">
+                  <li>تحليل الصور الطبية بدقة تفوق العين البشرية</li>
+                  <li>اكتشاف الأنماط المعقدة في البيانات الصحية</li>
+                  <li>التنبؤ بتطور المرض ومساره المستقبلي</li>
+                  <li>تقديم توصيات علاجية مخصصة لكل مريض</li>
                 </ul>
+
+                {/* Statistics Section */}
+                <div className="my-12 p-8 text-center" style={{ backgroundColor: '#f8f8f7', borderRadius: '12px' }}>
+                  <h3 className="text-2xl font-bold mb-8 text-gray-900">إحصائيات مذهلة</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div>
+                      <div className="text-4xl font-bold text-purple-600 mb-2">97%</div>
+                      <p className="text-gray-600">دقة تشخيص أمراض العيون</p>
+                    </div>
+                    <div>
+                      <div className="text-4xl font-bold text-purple-600 mb-2">50%</div>
+                      <p className="text-gray-600">تقليل الأخطاء التشخيصية</p>
               </div>
               <div>
-                <h4 className="font-semibold text-green-600 mb-2">الحلول:</h4>
-                <ul className="text-gray-700 space-y-1">
-                  <li>• تنويع مصادر البيانات</li>
-                  <li>• معايير صارمة للجودة</li>
-                  <li>• المراجعة المستمرة</li>
-                </ul>
+                      <div className="text-4xl font-bold text-purple-600 mb-2">70%</div>
+                      <p className="text-gray-600">توفير في وقت التشخيص</p>
+                    </div>
               </div>
             </div>
 
-            <h2>مستقبل التشخيص الطبي</h2>
+                <h2 className="text-2xl font-bold mb-4 text-gray-900 mt-8">التحديات والاعتبارات الأخلاقية</h2>
 
-            <h3>التشخيص التنبؤي</h3>
-            <p>نتجه نحو عصر جديد من الطب التنبؤي، حيث يمكن للذكاء الاصطناعي:</p>
-            <ul>
-              <li>التنبؤ بالأمراض قبل ظهورها</li>
-              <li>تحديد الأشخاص المعرضين للخطر</li>
-              <li>وضع خطط وقائية شخصية</li>
-            </ul>
+                <p className="text-gray-700 leading-relaxed mb-6">
+                  رغم الإنجازات المذهلة، يواجه تطبيق الذكاء الاصطناعي في التشخيص الطبي عدة تحديات:
+                </p>
 
-            <h3>الطب الشخصي المتقدم</h3>
-            <ul>
-              <li>تحليل الجينوم الشخصي لكل مريض</li>
-              <li>تصميم علاجات مخصصة</li>
-              <li>تحديد الجرعات المثلى لكل فرد</li>
-            </ul>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 my-8">
-              <h4 className="text-blue-800 font-semibold mb-3">🔮 نظرة على المستقبل</h4>
-              <p className="text-blue-700">
-                بحلول عام 2030، من المتوقع أن تصبح أنظمة الذكاء الاصطناعي قادرة على التنبؤ بالأمراض قبل ظهور أعراضها بسنوات، مما يفتح المجال أمام الطب الوقائي الشخصي.
-              </p>
+                <div className="space-y-4 mb-8">
+                  <div className="p-4 border-r-4 border-red-500" style={{ backgroundColor: '#fff5f5', borderRadius: '8px' }}>
+                    <h4 className="font-bold text-red-800 mb-2">خصوصية البيانات</h4>
+                    <p className="text-red-700">حماية البيانات الصحية الحساسة للمرضى وضمان استخدامها الأخلاقي.</p>
             </div>
 
-            <h2>التوصيات للمستقبل</h2>
-
-            <h3>للمؤسسات الطبية</h3>
-            <ol>
-              <li><strong>الاستثمار في التدريب</strong>: تدريب الكوادر الطبية على استخدام تقنيات الذكاء الاصطناعي</li>
-              <li><strong>تطوير البنية التحتية</strong>: تحديث الأنظمة التقنية لدعم هذه التقنيات</li>
-              <li><strong>وضع البروتوكولات</strong>: تطوير إرشادات واضحة لاستخدام الذكاء الاصطناعي</li>
-              <li><strong>ضمان الجودة</strong>: وضع معايير صارمة لضمان دقة وسلامة الأنظمة</li>
-            </ol>
-
-            <h3>للأطباء</h3>
-            <ol>
-              <li><strong>التعلم المستمر</strong>: مواكبة التطورات في مجال الذكاء الاصطناعي الطبي</li>
-              <li><strong>التعاون مع التقنية</strong>: النظر للذكاء الاصطناعي كشريك وليس منافس</li>
-              <li><strong>تطوير المهارات</strong>: التركيز على المهارات التي تميز الطبيب البشري</li>
-              <li><strong>التفكير النقدي</strong>: عدم الاعتماد الكامل على النتائج دون تقييم</li>
-            </ol>
-
-            <h2>خاتمة: نحو مستقبل طبي أكثر إشراقاً</h2>
-
-            <p>
-              إن الذكاء الاصطناعي في التشخيص الطبي ليس مجرد تقنية جديدة، بل ثورة حقيقية تعيد تعريف مفهوم الرعاية الصحية. نحن نشهد تحولاً من الطب التفاعلي إلى الطب التنبؤي، ومن التشخيص العام إلى الطب الشخصي المتقدم.
-            </p>
-
-            <p>
-              التحديات موجودة، والعقبات حقيقية، لكن الفوائد المحتملة تفوق بكثير المخاطر. نحن نتجه نحو عالم يمكن فيه اكتشاف الأمراض قبل ظهور أعراضها، وعلاجها بدقة متناهية، وتجنب معاناة لا حصر لها.
-            </p>
-
-            <p>
-              الطريق أمامنا واضح: التعاون بين الذكاء البشري والاصطناعي، والاستثمار في التدريب والتطوير، ووضع الأطر الأخلاقية والقانونية المناسبة. فقط من خلال هذا التعاون يمكننا تحقيق الإمكانات الكاملة لهذه التقنية الثورية.
-            </p>
-
-            <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-6 my-8">
-              <h4 className="font-semibold text-gray-800 mb-3">🚀 الخلاصة</h4>
-              <p className="text-gray-700">
-                إن مستقبل التشخيص الطبي مشرق، ونحن على أعتاب عصر جديد من الطب الدقيق والشخصي. عصر يكون فيه الكشف المبكر هو القاعدة وليس الاستثناء، وتكون فيه الدقة التشخيصية في أعلى مستوياتها. هذا ليس مجرد حلم مستقبلي، بل واقع نعيشه اليوم ونبنيه غداً.
-              </p>
+                  <div className="p-4 border-r-4 border-orange-500" style={{ backgroundColor: '#fff7ed', borderRadius: '8px' }}>
+                    <h4 className="font-bold text-orange-800 mb-2">الثقة والقبول</h4>
+                    <p className="text-orange-700">بناء ثقة الأطباء والمرضى في القرارات التشخيصية للذكاء الاصطناعي.</p>
             </div>
 
+                  <div className="p-4 border-r-4 border-blue-500" style={{ backgroundColor: '#eff6ff', borderRadius: '8px' }}>
+                    <h4 className="font-bold text-blue-800 mb-2">التنظيم والمعايير</h4>
+                    <p className="text-blue-700">وضع معايير واضحة لاعتماد واستخدام تقنيات الذكاء الاصطناعي الطبية.</p>
+                  </div>
           </div>
+
+                <h2 className="text-2xl font-bold mb-4 text-gray-900 mt-8">نظرة إلى المستقبل</h2>
+
+                <p className="text-gray-700 leading-relaxed mb-6">
+                  يعد مستقبل الذكاء الاصطناعي في التشخيص الطبي واعداً ومثيراً. مع التطور المستمر في التقنيات والخوارزميات، نتوقع أن نشهد:
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+                  {[
+                    {
+                      icon: <TrendingUp className="w-6 h-6" />,
+                      title: "طب شخصي متقدم",
+                      description: "علاجات مخصصة بناءً على الجينات والبيانات الصحية الفردية"
+                    },
+                    {
+                      icon: <Heart className="w-6 h-6" />,
+                      title: "تشخيص استباقي",
+                      description: "التنبؤ بالأمراض قبل ظهور الأعراض بسنوات"
+                    },
+                    {
+                      icon: <Brain className="w-6 h-6" />,
+                      title: "مساعدين أذكياء",
+                      description: "أنظمة ذكية تدعم الأطباء في اتخاذ القرارات السريرية"
+                    },
+                    {
+                      icon: <Activity className="w-6 h-6" />,
+                      title: "مراقبة مستمرة",
+                      description: "أجهزة ذكية تراقب الصحة على مدار الساعة"
+                    }
+                  ].map((item, index) => (
+                    <div key={index} className="flex gap-4">
+                      <div className="p-3 rounded-full shrink-0" style={{ backgroundColor: '#f0f0ef', height: 'fit-content' }}>
+                        <div className="text-purple-600">{item.icon}</div>
+              </div>
+                      <div>
+                        <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                        <p className="text-gray-600">{item.description}</p>
+              </div>
+            </div>
+                  ))}
+          </div>
+
+                <div className="mt-12 p-6 text-center" style={{ backgroundColor: '#f0f0ef', borderRadius: '12px' }}>
+                  <p className="text-lg font-medium text-gray-800">
+                    "الذكاء الاصطناعي لن يحل محل الأطباء، ولكن الأطباء الذين يستخدمون الذكاء الاصطناعي سيحلون محل أولئك الذين لا يستخدمونه"
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2">- د. إريك توبول، خبير الطب الرقمي</p>
+                </div>
+
+                  </div>
+            </CardContent>
+          </Card>
 
           {/* Author Bio */}
-          <div className="border-t border-gray-200 pt-8 mt-8">
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xl font-medium">س</span>
+          <Card className="mt-8 bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+            <CardContent className="p-6">
+              <h3 className="font-bold text-lg mb-4">عن الكاتب</h3>
+              <div className="flex gap-4">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl" style={{ backgroundColor: '#8b5cf6' }}>
+                  س
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-900">د. سارة الأحمد</h4>
+                  <p className="text-sm text-gray-600 mb-2">أخصائية الذكاء الاصطناعي الطبي</p>
+                  <p className="text-gray-700">
+                    باحثة متخصصة في تطبيقات الذكاء الاصطناعي في الطب، حاصلة على الدكتوراه في الذكاء الاصطناعي الطبي من جامعة ستانفورد. نشرت أكثر من 20 بحثاً علمياً في مجال التشخيص الطبي بالذكاء الاصطناعي.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-semibold text-gray-900">د. سارة الأحمد</h4>
-                <p className="text-gray-600 mb-2">أخصائية الذكاء الاصطناعي الطبي</p>
-                <p className="text-sm text-gray-700">
-                  حاصلة على دكتوراه في الذكاء الاصطناعي الطبي من جامعة ستانفورد، وتعمل حالياً كباحثة رئيسية في مختبر الذكاء الاصطناعي الطبي بمستشفى الملك فيصل التخصصي. لها أكثر من 50 بحثاً منشوراً في مجلات علمية محكمة.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Article Actions */}
-          <div className="border-t border-gray-200 pt-6 mt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/>
-                  </svg>
-                  أعجبني (127)
-                </button>
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd"/>
-                  </svg>
-                  تعليق (23)
-                </button>
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/>
-                  </svg>
-                  مشاركة
-                </button>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>تم التحقق من المحتوى طبياً</span>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Related Articles */}
-          <div className="border-t border-gray-200 pt-8 mt-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">مقالات ذات صلة</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <Link href="/articles/ai-in-education" className="group">
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <h4 className="font-medium text-gray-900 group-hover:text-blue-600 mb-2">
-                    مستقبل الذكاء الاصطناعي في التعليم
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    اكتشف كيف يحدث الذكاء الاصطناعي ثورة في مجال التعليم من خلال التعلم المخصص والتقييم الذكي...
-                  </p>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>أحمد محمد</span>
-                    <span>•</span>
-                    <span>15 يناير 2024</span>
-                  </div>
-                </div>
-              </Link>
-              
-              <div className="border border-gray-200 rounded-lg p-4 opacity-75">
-                <h4 className="font-medium text-gray-900 mb-2">
-                  الذكاء الاصطناعي في خدمة العملاء
-                </h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  كيف تحول الشات بوت تجربة المستخدم وتحسن من كفاءة خدمة العملاء...
-                </p>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span>قريباً</span>
-                </div>
-              </div>
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold mb-6">مقالات ذات صلة</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  title: "مستقبل التعلم الآلي في الصناعات الحديثة",
+                  category: "التعليم والتقنية",
+                  readingTime: 7
+                },
+                {
+                  title: "أخلاقيات الذكاء الاصطناعي في العصر الرقمي",
+                  category: "الأخلاقيات",
+                  readingTime: 6
+                },
+                {
+                  title: "الذكاء الاصطناعي في الأمن السيبراني",
+                  category: "الأمن السيبراني",
+                  readingTime: 7
+                }
+              ].map((article, index) => (
+                <Card key={index} className="hover:-translate-y-1 transition-all cursor-pointer bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
+                  <CardContent className="p-4">
+                    <div className="text-sm text-purple-600 mb-2">{article.category}</div>
+                    <h4 className="font-bold mb-2 hover:text-purple-600 transition-colors">{article.title}</h4>
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      <span>{article.readingTime} دقائق</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
@@ -396,4 +358,3 @@ export default function MedicalAIDiagnosisArticle() {
     </div>
   )
 }
-

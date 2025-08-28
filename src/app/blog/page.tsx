@@ -1,0 +1,175 @@
+'use client'
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+import { 
+  Calendar, 
+  Clock, 
+  User, 
+  Cpu,
+  Binary,
+  Code,
+  Brain,
+  Sparkles,
+  BookOpen,
+  Lightbulb,
+  Rocket,
+  Database,
+  Globe,
+  Shield
+} from "lucide-react"
+import { IBM_Plex_Sans_Arabic } from "next/font/google"
+
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+})
+
+export default function BlogPage() {
+  const articles = [
+    {
+      title: "الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر",
+      description: "اكتشف كيف يحدث الذكاء الاصطناعي ثورة في التشخيص الطبي، من الكشف المبكر عن السرطان إلى تشخيص أمراض العيون بدقة تفوق 97%.",
+      author: "د. سارة الأحمد",
+      date: "28 أغسطس 2024",
+      readingTime: 8,
+      slug: "ai-medical-diagnosis",
+      icon: <Cpu className="w-6 h-6" />,
+      category: "الطب والذكاء الاصطناعي"
+    },
+    {
+      title: "مستقبل التعلم الآلي في الصناعات الحديثة",
+      description: "رحلة استكشافية في عالم التعلم الآلي وتطبيقاته المستقبلية في مختلف الصناعات من الطب إلى الفضاء.",
+      author: "م. أحمد محمد",
+      date: "15 أغسطس 2024",
+      readingTime: 7,
+      slug: "future-of-ai-in-education",
+      icon: <Binary className="w-6 h-6" />,
+      category: "التعليم والتقنية"
+    },
+    {
+      title: "أخلاقيات الذكاء الاصطناعي في العصر الرقمي",
+      description: "نقاش معمق حول التحديات الأخلاقية التي يطرحها تطور الذكاء الاصطناعي وكيفية وضع أطر تنظيمية فعالة.",
+      author: "د. فاطمة الزهراء",
+      date: "10 أغسطس 2024",
+      readingTime: 6,
+      slug: "ai-ethics",
+      icon: <Code className="w-6 h-6" />,
+      category: "الأخلاقيات"
+    },
+    {
+      title: "الشبكات العصبية العميقة: فهم الأساسيات",
+      description: "دليل شامل لفهم كيفية عمل الشبكات العصبية العميقة وتطبيقاتها في مختلف المجالات التقنية.",
+      author: "د. محمد الخالد",
+      date: "5 أغسطس 2024",
+      readingTime: 10,
+      slug: "deep-neural-networks",
+      icon: <Brain className="w-6 h-6" />,
+      category: "تعلم الآلة"
+    },
+    {
+      title: "معالجة اللغة الطبيعية باللغة العربية",
+      description: "تحديات وحلول معالجة اللغة العربية باستخدام تقنيات الذكاء الاصطناعي الحديثة.",
+      author: "د. نورا السالم",
+      date: "1 أغسطس 2024",
+      readingTime: 9,
+      slug: "arabic-nlp",
+      icon: <BookOpen className="w-6 h-6" />,
+      category: "معالجة اللغة"
+    },
+    {
+      title: "الذكاء الاصطناعي في الأمن السيبراني",
+      description: "كيف يساهم الذكاء الاصطناعي في تعزيز الأمن الرقمي ومكافحة التهديدات السيبرانية.",
+      author: "م. خالد العمري",
+      date: "28 يوليو 2024",
+      readingTime: 7,
+      slug: "ai-cybersecurity",
+      icon: <Shield className="w-6 h-6" />,
+      category: "الأمن السيبراني"
+    }
+  ]
+
+  return (
+    <div className={`min-h-screen ${ibmPlexArabic.className} bg-[#f8f8f7] dark:bg-[#1a1a1a]`}>
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-4 flex items-center justify-center gap-3">
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                مكتبة المقالات
+              </span>
+              <Sparkles className="w-8 h-8 lg:w-10 lg:h-10 text-yellow-500 dark:text-yellow-400" />
+            </h1>
+            <p className="text-xl text-gray-700 dark:text-gray-300">
+              اكتشف عالم الذكاء الاصطناعي من خلال مقالاتنا المتخصصة
+            </p>
+          </div>
+
+          {/* Articles Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {articles.map((article, index) => (
+              <Link href={`/articles/${article.slug}`} key={index}>
+                <Card 
+                  className="group transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col h-full bg-white dark:bg-gray-800 dark:border-gray-700"
+                  style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
+                >
+                  <CardHeader className="p-6 pb-4">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="p-3 text-purple-600 dark:text-purple-400 shrink-0 bg-gray-100 dark:bg-gray-700" style={{ borderRadius: '8px' }}>
+                          {article.icon}
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-2">{article.category}</div>
+                          <CardTitle className="text-xl group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-2 dark:text-gray-100">
+                            {article.title}
+                          </CardTitle>
+                        </div>
+                      </div>
+                    </div>
+                    <CardDescription className="text-gray-600 dark:text-gray-400 line-clamp-3 text-base leading-relaxed">
+                      {article.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="mt-auto pt-0 px-6 pb-6">
+                    {/* Publication Info */}
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400 dark:border-gray-700" style={{ borderTop: '1px solid #f0f0ef', paddingTop: '12px' }}>
+                      <div className="flex items-center gap-1">
+                        <User className="w-4 h-4" />
+                        <span>{article.author}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{article.date}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{article.readingTime} دقائق</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          {/* Load More Section */}
+          <div className="text-center mt-12">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">عرض 6 من 24 مقال</p>
+            <button 
+              className="px-6 py-3 transition-colors bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-700"
+              style={{ 
+                border: '1px solid #f0f0ef',
+                borderRadius: '8px'
+              }}
+            >
+              عرض المزيد
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
