@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+:root {
+  --background: 249 250 251;
+  --foreground: 17 24 39;
+  --card: 255 255 255;
+  --card-foreground: 17 24 39;
+  --popover: 255 255 255;
+  --popover-foreground: 17 24 39;
+  --primary: 37 99 235;
+  --primary-foreground: 248 250 252;
+  --secondary: 243 244 246;
+  --secondary-foreground: 17 24 39;
+  --muted: 243 244 246;
+  --muted-foreground: 107 114 128;
+  --accent: 243 244 246;
+  --accent-foreground: 17 24 39;
+  --destructive: 239 68 68;
+  --destructive-foreground: 248 250 252;
+  --border: 229 231 235;
+  --input: 229 231 235;
+  --ring: 37 99 235;
+  --chart-1: 37 99 235;
+  --chart-2: 16 185 129;
+  --chart-3: 245 158 11;
+  --chart-4: 239 68 68;
+  --chart-5: 139 92 246;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 17 24 39;
+  --foreground: 248 250 252;
+  --card: 31 41 55;
+  --card-foreground: 248 250 252;
+  --popover: 31 41 55;
+  --popover-foreground: 248 250 252;
+  --primary: 59 130 246;
+  --primary-foreground: 17 24 39;
+  --secondary: 55 65 81;
+  --secondary-foreground: 248 250 252;
+  --muted: 55 65 81;
+  --muted-foreground: 156 163 175;
+  --accent: 55 65 81;
+  --accent-foreground: 248 250 252;
+  --destructive: 220 38 38;
+  --destructive-foreground: 248 250 252;
+  --border: 55 65 81;
+  --input: 55 65 81;
+  --ring: 59 130 246;
+  --chart-1: 59 130 246;
+  --chart-2: 34 197 94;
+  --chart-3: 251 191 36;
+  --chart-4: 248 113 113;
+  --chart-5: 168 85 247;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-arabic), 'Noto Sans Arabic', system-ui, sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* RTL Support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .prose {
+  text-align: right;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground));
+}
+
+/* Typography improvements */
+.prose {
+  max-width: none;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-family: 'Noto Sans Arabic', system-ui, sans-serif;
+  font-weight: 600;
+}
+
+.prose blockquote {
+  border-right: 4px solid hsl(var(--primary));
+  border-left: none;
+  padding-right: 1rem;
+  padding-left: 0;
+  font-style: normal;
+}
+
+.prose code {
+  background-color: hsl(var(--muted));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.prose pre {
+  background-color: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
