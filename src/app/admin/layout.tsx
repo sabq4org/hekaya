@@ -68,8 +68,12 @@ export default function AdminLayout({
     <div className={`min-h-screen bg-gray-50 ${ibmPlexArabic.className}`} dir="rtl">
       <AdminHeader />
       <div className="flex">
-        <AdminSidebar />
-        <main className="flex-1 mr-64 p-8">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block">
+          <AdminSidebar />
+        </div>
+        {/* Main Content */}
+        <main className="flex-1 lg:mr-64 p-4 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
