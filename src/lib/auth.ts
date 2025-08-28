@@ -1,12 +1,33 @@
 import { NextAuthOptions } from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma"
-import bcrypt from "bcryptjs"
 import { Role } from "@prisma/client"
 
+// Temporary demo users (replace with database when ready)
+const demoUsers = [
+  {
+    id: "1",
+    email: "admin@hekaya-ai.com",
+    name: "مدير الموقع",
+    password: "admin123",
+    role: "ADMIN" as Role
+  },
+  {
+    id: "2", 
+    email: "editor@hekaya-ai.com",
+    name: "محرر المحتوى",
+    password: "editor123",
+    role: "EDITOR" as Role
+  },
+  {
+    id: "3",
+    email: "author@hekaya-ai.com", 
+    name: "كاتب المقالات",
+    password: "author123",
+    role: "AUTHOR" as Role
+  }
+]
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -19,20 +40,15 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
-          }
-        })
-
+        // Find user in demo data
+        const user = demoUsers.find(u => u.email === credentials.email)
+        
         if (!user) {
           return null
         }
 
-        // For demo purposes, we'll use simple password check
-        const isPasswordValid = credentials.password === "admin123"
-
-        if (!isPasswordValid) {
+        // Check password
+        if (credentials.password !== user.password) {
           return null
         }
 
@@ -65,7 +81,8 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/admin/login",
-  }
+  },
+  secret: process.env.NEXTAUTH_SECRET || "temp-secret-for-development"
 }
 
 // Helper function to check if user has required role

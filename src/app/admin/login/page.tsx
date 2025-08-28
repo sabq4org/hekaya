@@ -27,20 +27,27 @@ export default function LoginPage() {
     setError('')
 
     try {
+      console.log('Attempting login with:', { email, password }) // للتحقق
+
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
       })
 
+      console.log('SignIn result:', result) // للتحقق
+
       if (result?.error) {
         setError('بيانات تسجيل الدخول غير صحيحة')
       } else if (result?.ok) {
-        router.push('/admin')
+        // انتظار قليل للتأكد من تحديث الـ session
+        setTimeout(() => {
+          router.push('/admin')
+        }, 1000)
       }
     } catch (err) {
       setError('حدث خطأ أثناء تسجيل الدخول')
-      console.error(err)
+      console.error('Login error:', err)
     } finally {
       setIsLoading(false)
     }
