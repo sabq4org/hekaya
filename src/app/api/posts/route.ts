@@ -1,172 +1,437 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import {
+  withErrorHandling,
+  successResponse,
+  errorResponse,
+  requireAuth,
+  requirePermission,
+  parsePagination,
+  parseFilters,
+  validateRequired,
+  createSlug,
+  logApiAction,
+  ApiErrors,
+} from '@/lib/api-helpers'
+import { Permission } from '@/lib/permissions'
+import { PostStatus, Role } from '@prisma/client'
 
-// GET /api/posts - جلب جميع المقالات
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const status = searchParams.get('status')
-    const category = searchParams.get('category')
-    const search = searchParams.get('search')
-
-    const skip = (page - 1) * limit
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {}
-    
-    if (status && status !== 'all') {
-      where.status = status
-    }
-    
-    if (category && category !== 'all') {
-      where.category = { name: category }
-    }
-    
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { excerpt: { contains: search, mode: 'insensitive' } },
-        { content: { contains: search, mode: 'insensitive' } }
-      ]
-    }
-
-    const [posts, total] = await Promise.all([
-      prisma.post.findMany({
-        where,
-        include: {
-          author: {
-            select: { id: true, name: true, email: true }
-          },
-          section: true,
-          tags: {
-            include: {
-              tag: true
-            }
-          },
-          _count: {
-            select: { comments: true }
-          }
-        },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit
-      }),
-      prisma.post.count({ where })
-    ])
-
-    return NextResponse.json({
-      posts,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    })
-  } catch (error) {
-    console.error('Error fetching posts:', error)
-    return NextResponse.json(
-      { error: 'خطأ في جلب المقالات' },
-      { status: 500 }
-    )
+// GET /api/posts - الحصول على قائمة المقالات
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  const { page, limit, skip } = parsePagination(request)
+  const filters = parseFilters(request)
+  const url = new URL(request.url)
+  
+  // فلاتر إضافية
+  const featured = url.searchParams.get('featured')
+  const published = url.searchParams.get('published')
+  const authorId = url.searchParams.get('authorId')
+  const sectionId = url.searchParams.get('sectionId')
+  const tagId = url.searchParams.get('tagId')
+  
+  // بناء شروط البحث
+  const where: any = {}
+  
+  // البحث النصي
+  if (filters.search) {
+    where.OR = [
+      { title: { contains: filters.search, mode: 'insensitive' } },
+      { summary: { contains: filters.search, mode: 'insensitive' } },
+      { contentText: { contains: filters.search, mode: 'insensitive' } },
+    ]
   }
-}
-
-// POST /api/posts - إنشاء مقال جديد
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'يجب تسجيل الدخول أولاً' },
-        { status: 401 }
-      )
-    }
-
-    const body = await request.json()
-    const {
-      title,
-      slug,
-      summary,
-      content,
-      status,
-      coverImage,
-      publishedAt,
-      sectionId,
-      tagIds = []
-    } = body
-
-    // التحقق من البيانات المطلوبة
-    if (!title || !content) {
-      return NextResponse.json(
-        { error: 'العنوان والمحتوى مطلوبان' },
-        { status: 400 }
-      )
-    }
-
-    // التحقق من عدم تكرار الـ slug
-    if (slug) {
-      const existingPost = await prisma.post.findUnique({
-        where: { slug }
-      })
-
-      if (existingPost) {
-        return NextResponse.json(
-          { error: 'الرابط المختصر مستخدم بالفعل' },
-          { status: 400 }
-        )
+  
+  // فلترة بالحالة
+  if (filters.status) {
+    where.status = filters.status
+  }
+  
+  // فلترة بالكاتب
+  if (filters.author || authorId) {
+    where.authorId = filters.author || authorId
+  }
+  
+  // فلترة بالقسم
+  if (filters.section || sectionId) {
+    where.sectionId = filters.section || sectionId
+  }
+  
+  // فلترة بالوسم
+  if (filters.tag || tagId) {
+    where.tags = {
+      some: {
+        tagId: filters.tag || tagId
       }
     }
-
-    // إنشاء المقال
-    const post = await prisma.post.create({
-      data: {
-        title,
-        slug: slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-أ-ي]/g, ''),
-        summary,
-        content,
-        status,
-        coverImage,
-        publishedAt: status === 'PUBLISHED' ? publishedAt || new Date() : null,
-        authorId: session.user.id,
-        sectionId
-      },
+  }
+  
+  // فلترة المقالات المميزة
+  if (featured === 'true') {
+    where.isFeatured = true
+  }
+  
+  // فلترة المقالات المنشورة فقط
+  if (published === 'true') {
+    where.status = PostStatus.PUBLISHED
+    where.publishedAt = { lte: new Date() }
+  }
+  
+  // التحقق من الصلاحيات
+  try {
+    const user = await requireAuth(request)
+    
+    // إذا لم يكن مدير أو محرر، يرى مقالاته فقط
+    if (user.role === Role.AUTHOR) {
+      where.authorId = user.id
+    }
+  } catch {
+    // للزوار غير المسجلين، المقالات المنشورة فقط
+    where.status = PostStatus.PUBLISHED
+    where.publishedAt = { lte: new Date() }
+  }
+  
+  const [posts, total] = await Promise.all([
+    prisma.post.findMany({
+      where,
       include: {
         author: {
-          select: { id: true, name: true, email: true }
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
         },
-        section: true,
+        section: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
+          },
+        },
         tags: {
           include: {
-            tag: true
-          }
-        }
-      }
-    })
+            tag: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                color: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            comments: {
+              where: { status: 'APPROVED' }
+            },
+          },
+        },
+      },
+      orderBy: { [filters.sortBy]: filters.sortOrder },
+      skip,
+      take: limit,
+    }),
+    prisma.post.count({ where }),
+  ])
+  
+  // تنسيق البيانات
+  const formattedPosts = posts.map(post => ({
+    ...post,
+    tags: post.tags.map(pt => pt.tag),
+    commentsCount: post._count.comments,
+    _count: undefined,
+  }))
+  
+  return successResponse(formattedPosts, undefined, {
+    page,
+    limit,
+    total,
+    pages: Math.ceil(total / limit),
+  })
+})
 
-    // إضافة الوسوم
-    if (tagIds.length > 0) {
-      await prisma.postTag.createMany({
-        data: tagIds.map((tagId: string) => ({
-          postId: post.id,
-          tagId
-        })),
-        skipDuplicates: true
-      })
-    }
-
-    return NextResponse.json(post, { status: 201 })
-  } catch (error) {
-    console.error('Error creating post:', error)
-    return NextResponse.json(
-      { error: 'خطأ في إنشاء المقال' },
-      { status: 500 }
-    )
+// POST /api/posts - إنشاء مقال جديد
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const user = await requirePermission(request, Permission.CREATE_POST)
+  const data = await request.json()
+  
+  // التحقق من البيانات المطلوبة
+  validateRequired(data, ['title', 'content'])
+  
+  // إنشاء slug تلقائياً إذا لم يكن موجوداً
+  if (!data.slug) {
+    data.slug = createSlug(data.title)
   }
-}
+  
+  // التأكد من أن الـ slug فريد
+  const existingPost = await prisma.post.findUnique({
+    where: { slug: data.slug },
+  })
+  
+  if (existingPost) {
+    data.slug = `${data.slug}-${Date.now()}`
+  }
+  
+  // حساب وقت القراءة التقريبي
+  if (data.contentText) {
+    const wordsPerMinute = 200
+    const wordCount = data.contentText.split(/\s+/).length
+    data.readingTime = Math.ceil(wordCount / wordsPerMinute)
+  }
+  
+  // إعداد البيانات للإنشاء
+  const postData: any = {
+    title: data.title,
+    slug: data.slug,
+    summary: data.summary,
+    content: data.content,
+    contentText: data.contentText,
+    status: data.status || PostStatus.DRAFT,
+    coverImage: data.coverImage,
+    coverAlt: data.coverAlt,
+    readingTime: data.readingTime || 0,
+    authorId: user.id,
+    sectionId: data.sectionId,
+    scheduledFor: data.scheduledFor ? new Date(data.scheduledFor) : null,
+    metaTitle: data.metaTitle,
+    metaDescription: data.metaDescription,
+    ogImage: data.ogImage,
+    isFeatured: data.isFeatured || false,
+    isPinned: data.isPinned || false,
+    allowComments: data.allowComments !== false,
+  }
+  
+  // إذا كان المقال منشوراً، تعيين تاريخ النشر
+  if (postData.status === PostStatus.PUBLISHED) {
+    postData.publishedAt = new Date()
+  }
+  
+  // إنشاء المقال
+  const post = await prisma.post.create({
+    data: postData,
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+      section: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          color: true,
+        },
+      },
+    },
+  })
+  
+  // ربط الوسوم إذا كانت موجودة
+  if (data.tagIds && Array.isArray(data.tagIds)) {
+    await prisma.postTag.createMany({
+      data: data.tagIds.map((tagId: string) => ({
+        postId: post.id,
+        tagId,
+      })),
+      skipDuplicates: true,
+    })
+    
+    // تحديث عداد استخدام الوسوم
+    await prisma.tag.updateMany({
+      where: { id: { in: data.tagIds } },
+      data: { usageCount: { increment: 1 } },
+    })
+  }
+  
+  // تسجيل العملية
+  await logApiAction(
+    request,
+    'POST_CREATE',
+    'POST',
+    post.id,
+    { title: post.title, status: post.status }
+  )
+  
+  return successResponse(post, 'تم إنشاء المقال بنجاح')
+})
+
+// PUT /api/posts/bulk - عمليات جماعية
+export const PUT = withErrorHandling(async (request: NextRequest) => {
+  const user = await requirePermission(request, Permission.UPDATE_POST)
+  const { action, postIds, data } = await request.json()
+  
+  validateRequired({ action, postIds }, ['action', 'postIds'])
+  
+  if (!Array.isArray(postIds) || postIds.length === 0) {
+    throw new Error('يجب تحديد مقالات للتعديل')
+  }
+  
+  let result
+  
+  switch (action) {
+    case 'updateStatus':
+      validateRequired(data, ['status'])
+      
+      const updateData: any = { status: data.status }
+      
+      // إذا كان النشر، تعيين تاريخ النشر
+      if (data.status === PostStatus.PUBLISHED) {
+        updateData.publishedAt = new Date()
+      }
+      
+      result = await prisma.post.updateMany({
+        where: { 
+          id: { in: postIds },
+          // التأكد من أن المستخدم يمكنه تعديل هذه المقالات
+          ...(user.role === Role.AUTHOR ? { authorId: user.id } : {}),
+        },
+        data: updateData,
+      })
+      
+      await logApiAction(
+        request,
+        'POST_BULK_UPDATE_STATUS',
+        'POST',
+        undefined,
+        { postIds, status: data.status, count: result.count }
+      )
+      
+      break
+      
+    case 'updateSection':
+      validateRequired(data, ['sectionId'])
+      
+      result = await prisma.post.updateMany({
+        where: { 
+          id: { in: postIds },
+          ...(user.role === Role.AUTHOR ? { authorId: user.id } : {}),
+        },
+        data: { sectionId: data.sectionId },
+      })
+      
+      await logApiAction(
+        request,
+        'POST_BULK_UPDATE_SECTION',
+        'POST',
+        undefined,
+        { postIds, sectionId: data.sectionId, count: result.count }
+      )
+      
+      break
+      
+    case 'addTags':
+      validateRequired(data, ['tagIds'])
+      
+      // إضافة الوسوم للمقالات
+      const tagAssignments = postIds.flatMap((postId: string) =>
+        data.tagIds.map((tagId: string) => ({ postId, tagId }))
+      )
+      
+      await prisma.postTag.createMany({
+        data: tagAssignments,
+        skipDuplicates: true,
+      })
+      
+      // تحديث عداد استخدام الوسوم
+      await prisma.tag.updateMany({
+        where: { id: { in: data.tagIds } },
+        data: { usageCount: { increment: postIds.length } },
+      })
+      
+      result = { count: postIds.length }
+      
+      await logApiAction(
+        request,
+        'POST_BULK_ADD_TAGS',
+        'POST',
+        undefined,
+        { postIds, tagIds: data.tagIds, count: postIds.length }
+      )
+      
+      break
+      
+    case 'removeTags':
+      validateRequired(data, ['tagIds'])
+      
+      await prisma.postTag.deleteMany({
+        where: {
+          postId: { in: postIds },
+          tagId: { in: data.tagIds },
+        },
+      })
+      
+      // تحديث عداد استخدام الوسوم
+      await prisma.tag.updateMany({
+        where: { id: { in: data.tagIds } },
+        data: { usageCount: { decrement: 1 } },
+      })
+      
+      result = { count: postIds.length }
+      
+      await logApiAction(
+        request,
+        'POST_BULK_REMOVE_TAGS',
+        'POST',
+        undefined,
+        { postIds, tagIds: data.tagIds, count: postIds.length }
+      )
+      
+      break
+      
+    case 'delete':
+      // التأكد من الصلاحية
+      await requirePermission(request, Permission.DELETE_POST)
+      
+      // حذف المقالات
+      result = await prisma.post.deleteMany({
+        where: { 
+          id: { in: postIds },
+          ...(user.role === Role.AUTHOR ? { authorId: user.id } : {}),
+        },
+      })
+      
+      await logApiAction(
+        request,
+        'POST_BULK_DELETE',
+        'POST',
+        undefined,
+        { postIds, count: result.count }
+      )
+      
+      break
+      
+    case 'archive':
+      result = await prisma.post.updateMany({
+        where: { 
+          id: { in: postIds },
+          ...(user.role === Role.AUTHOR ? { authorId: user.id } : {}),
+        },
+        data: { 
+          status: PostStatus.ARCHIVED,
+          archivedAt: new Date(),
+        },
+      })
+      
+      await logApiAction(
+        request,
+        'POST_BULK_ARCHIVE',
+        'POST',
+        undefined,
+        { postIds, count: result.count }
+      )
+      
+      break
+      
+    default:
+      throw new Error('عملية غير مدعومة')
+  }
+  
+  return successResponse(result, `تم تنفيذ العملية على ${result.count} مقال`)
+})
 

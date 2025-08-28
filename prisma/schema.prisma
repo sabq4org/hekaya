@@ -37,25 +37,6 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          Role      @default(READER)
-  bio           String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts Account[]
-  sessions Session[]
-  posts    Post[]
-  comments Comment[]
-  auditLogs AuditLog[]
-}
-
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -64,31 +45,32 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Post {
-  id          String      @id @default(cuid())
-  title       String
-  slug        String      @unique
-  summary     String?
-  content     String      @db.Text
-  status      PostStatus  @default(DRAFT)
-  coverImage  String?
-  authorId    String
-  sectionId   String?
-  publishedAt DateTime?
-  readingTime Int?        @default(0)
-  views       Int         @default(0)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role       @default(AUTHOR)
+  status        UserStatus @default(ACTIVE)
+  bio           String?
+  twoFactorEnabled Boolean @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  author   User      @relation(fields: [authorId], references: [id])
-  section  Section?  @relation(fields: [sectionId], references: [id])
-  tags     PostTag[]
-  comments Comment[]
-  media    PostMedia[]
+  accounts      Account[]
+  sessions      Session[]
+  posts         Post[]
+  comments      Comment[]
+  auditLogs     AuditLog[]
+  ownedMedia    Media[]
+  notifications Notification[]
 
-  @@index([status, publishedAt])
-  @@index([authorId])
-  @@index([sectionId])
+  @@index([email])
+  @@index([role])
+  @@index([status])
 }
 
 model Section {
@@ -96,25 +78,84 @@ model Section {
   name        String
   slug        String    @unique
   description String?
+  color       String?   // لون التمييز في لوحة التصنيفات
   parentId    String?
   order       Int       @default(0)
+  views       Int       @default(0)
+  isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  parent   Section?  @relation("SectionHierarchy", fields: [parentId], references: [id])
-  children Section[] @relation("SectionHierarchy")
+  parent   Section?  @relation("SectionToSection", fields: [parentId], references: [id])
+  children Section[] @relation("SectionToSection")
   posts    Post[]
+
+  @@index([slug])
+  @@index([parentId])
+  @@index([isActive])
 }
 
 model Tag {
   id        String    @id @default(cuid())
-  name      String    @unique
+  name      String
   slug      String    @unique
   color     String?
+  description String?
+  usageCount Int      @default(0)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   posts PostTag[]
+
+  @@index([slug])
+  @@index([usageCount])
+}
+
+model Post {
+  id           String     @id @default(cuid())
+  title        String
+  slug         String     @unique
+  summary      String?
+  content      Json?      // محتوى محرر Tiptap/Editor.js بصيغة JSON
+  contentText  String?    @db.Text // نسخة نصية للبحث
+  status       PostStatus @default(DRAFT)
+  coverImage   String?
+  coverAlt     String?
+  readingTime  Int        @default(0)
+  authorId     String
+  sectionId    String?
+  scheduledFor DateTime?
+  publishedAt  DateTime?
+  views        Int        @default(0)
+  likes        Int        @default(0)
+  shares       Int        @default(0)
+  
+  // SEO fields
+  metaTitle    String?
+  metaDescription String?
+  ogImage      String?
+  
+  // Content flags
+  isFeatured   Boolean    @default(false)
+  isPinned     Boolean    @default(false)
+  allowComments Boolean   @default(true)
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  archivedAt   DateTime?
+
+  author       User        @relation(fields: [authorId], references: [id])
+  section      Section?    @relation(fields: [sectionId], references: [id])
+  tags         PostTag[]
+  comments     Comment[]
+  media        PostMedia[]
+
+  @@index([status, publishedAt])
+  @@index([authorId])
+  @@index([sectionId])
+  @@index([slug])
+  @@index([isFeatured])
+  @@index([scheduledFor])
 }
 
 model PostTag {
@@ -136,16 +177,23 @@ model Comment {
   postId      String
   parentId    String?
   status      CommentStatus @default(PENDING)
+  ipAddress   String?
+  userAgent   String?
+  isSpam      Boolean       @default(false)
+  moderatedBy String?
+  moderatedAt DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  author   User?     @relation(fields: [authorId], references: [id])
-  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  replies  Comment[] @relation("CommentReplies")
+  author     User?     @relation(fields: [authorId], references: [id])
+  post       Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies    Comment[] @relation("CommentReplies")
 
   @@index([postId])
   @@index([status])
+  @@index([authorEmail])
+  @@index([createdAt])
 }
 
 model Media {
@@ -153,20 +201,32 @@ model Media {
   url         String
   type        MediaType
   alt         String?
+  caption     String?
   width       Int?
   height      Int?
   size        Int?
   filename    String
   mimeType    String
-  uploadedBy  String
+  folder      String?   // تنظيم في مجلدات
+  ownerId     String?
+  isPublic    Boolean   @default(true)
+  exifData    Json?     // بيانات EXIF للصور
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
+  owner User?       @relation(fields: [ownerId], references: [id])
   posts PostMedia[]
+
+  @@index([type])
+  @@index([ownerId])
+  @@index([folder])
+  @@index([createdAt])
 }
 
 model PostMedia {
   postId  String
   mediaId String
+  order   Int    @default(0)
 
   post  Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
   media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
@@ -175,41 +235,139 @@ model PostMedia {
 }
 
 model Setting {
-  key       String   @id
-  value     String   @db.Text
-  type      String   @default("string")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  key         String   @id
+  value       Json
+  type        String   @default("string")
+  category    String   @default("general")
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
 }
 
-model Subscription {
-  id        String              @id @default(cuid())
-  email     String              @unique
-  status    SubscriptionStatus  @default(ACTIVE)
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
+model NewsletterSubscriber {
+  id          String             @id @default(cuid())
+  email       String             @unique
+  name        String?
+  status      SubscriberStatus   @default(PENDING)
+  source      String?            // مصدر الاشتراك
+  preferences Json?              // تفضيلات المحتوى
+  verifiedAt  DateTime?
+  unsubscribedAt DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([status])
+  @@index([email])
+}
+
+model NewsletterCampaign {
+  id          String              @id @default(cuid())
+  subject     String
+  content     String              @db.Text
+  htmlContent String?             @db.Text
+  status      CampaignStatus      @default(DRAFT)
+  scheduledFor DateTime?
+  sentAt      DateTime?
+  recipientCount Int              @default(0)
+  openCount   Int                 @default(0)
+  clickCount  Int                 @default(0)
+  createdBy   String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([status])
+  @@index([scheduledFor])
 }
 
 model AuditLog {
   id        String   @id @default(cuid())
-  actorId   String
+  actorId   String?
   action    String
   target    String
+  targetId  String?
   meta      Json?
+  ipAddress String?
+  userAgent String?
   createdAt DateTime @default(now())
 
-  actor User @relation(fields: [actorId], references: [id])
+  actor User? @relation(fields: [actorId], references: [id])
 
   @@index([actorId])
   @@index([action])
+  @@index([target])
   @@index([createdAt])
 }
 
+model Notification {
+  id        String             @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean            @default(false)
+  createdAt DateTime           @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model Analytics {
+  id        String   @id @default(cuid())
+  date      DateTime
+  metric    String
+  value     Int
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@unique([date, metric])
+  @@index([date])
+  @@index([metric])
+}
+
+model SearchIndex {
+  id          String   @id @default(cuid())
+  objectId    String
+  objectType  String
+  title       String
+  content     String   @db.Text
+  metadata    Json?
+  searchVector String? // للبحث النصي المتقدم
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([objectId, objectType])
+  @@index([objectType])
+}
+
+model BackupLog {
+  id        String      @id @default(cuid())
+  type      BackupType
+  status    BackupStatus
+  filename  String?
+  size      Int?
+  error     String?
+  startedAt DateTime    @default(now())
+  completedAt DateTime?
+}
+
+// Enums
 enum Role {
   ADMIN
   EDITOR
   AUTHOR
   READER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
 }
 
 enum PostStatus {
@@ -234,8 +392,39 @@ enum MediaType {
   DOCUMENT
 }
 
-enum SubscriptionStatus {
+enum SubscriberStatus {
+  PENDING
   ACTIVE
   UNSUBSCRIBED
   BOUNCED
 }
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+}
+
+enum NotificationType {
+  COMMENT_NEW
+  POST_PUBLISHED
+  POST_SCHEDULED
+  SYSTEM_ALERT
+  BACKUP_COMPLETE
+  BACKUP_FAILED
+}
+
+enum BackupType {
+  DATABASE
+  MEDIA
+  FULL
+}
+
+enum BackupStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
