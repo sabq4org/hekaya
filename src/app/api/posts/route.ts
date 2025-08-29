@@ -180,6 +180,28 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     data.readingTime = Math.ceil(wordCount / wordsPerMinute)
   }
   
+  // تحديد الكاتب الفعلي في قاعدة البيانات لتفادي كسر FK
+  if (!user.email) {
+    throw new Error('لا يمكن تحديد هوية المستخدم (البريد الإلكتروني مفقود)')
+  }
+  const dbUser = await prisma.user.upsert({
+    where: { email: user.email },
+    update: { name: user.name ?? undefined },
+    create: {
+      email: user.email,
+      name: user.name ?? 'مستخدم',
+      // الأدوار الافتراضية حسب المخطط
+      role: Role.AUTHOR,
+      status: 'ACTIVE',
+      emailVerified: new Date(),
+    },
+  })
+
+  // السماح بتمرير authorId فقط للمدير/المحرر
+  const resolvedAuthorId = (data.authorId && (user.role === Role.ADMIN || user.role === Role.EDITOR))
+    ? data.authorId
+    : dbUser.id
+
   // إعداد البيانات للإنشاء
   const postData: Record<string, unknown> = {
     title: data.title,
@@ -191,7 +213,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     coverImage: data.coverImage,
     coverAlt: data.coverAlt,
     readingTime: data.readingTime || 0,
-    authorId: user.id,
+    authorId: resolvedAuthorId,
     sectionId: data.sectionId,
     scheduledFor: data.scheduledFor ? new Date(data.scheduledFor) : null,
     metaTitle: data.metaTitle,

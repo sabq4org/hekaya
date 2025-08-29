@@ -38,6 +38,7 @@ export default function NewPost() {
   const [metaTitle, setMetaTitle] = useState('')
   const [metaDescription, setMetaDescription] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const [sections, setSections] = useState<{id: string, name: string}[]>([])
   const [allTags, setAllTags] = useState<{id: string, name: string}[]>([])
   const [loadingOpts, setLoadingOpts] = useState(true)
@@ -127,10 +128,14 @@ export default function NewPost() {
         throw new Error(json?.error || 'تعذر حفظ المقال')
       }
 
+      // إشعار نجاح
+      setToast({ type: 'success', message: 'تم حفظ المقال بنجاح' })
+
       // التوجيه بعد الإنشاء: العودة دائماً لقائمة المقالات في لوحة التحكم
       router.push('/admin/posts')
     } catch (error) {
       console.error(error)
+      setToast({ type: 'error', message: (error as Error).message || 'حدث خطأ غير متوقع أثناء الحفظ' })
       alert((error as Error).message || 'حدث خطأ غير متوقع أثناء الحفظ')
     } finally {
       setIsSaving(false)
@@ -193,6 +198,11 @@ export default function NewPost() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {toast && (
+            <div className={`mb-4 px-4 py-3 rounded-lg ${toast.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {toast.message}
+            </div>
+          )}
           {/* Title & Basic Info */}
           <Card 
             className="bg-white dark:bg-gray-800 dark:border-gray-700"
