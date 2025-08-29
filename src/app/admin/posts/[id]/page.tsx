@@ -359,6 +359,7 @@ export default function EditPost() {
           >
             <CardHeader>
               <CardTitle className="dark:text-gray-100">محتوى المقال</CardTitle>
+              <CardDescription className="dark:text-gray-400">استخدم محرر النصوص المتقدم لكتابة مقال احترافي</CardDescription>
             </CardHeader>
             <CardContent>
               <TiptapEditor 

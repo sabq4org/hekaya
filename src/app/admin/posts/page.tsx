@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import Image from 'next/image'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
   Plus, 
   Search, 
-  Filter,
   Eye,
   MessageSquare,
   Calendar,
@@ -297,7 +297,13 @@ export default function PostsPage() {
                   {/* Thumbnail */}
                   <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-lg shrink-0 overflow-hidden">
                     {post.coverImage && (
-                      <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+                      <Image 
+                        src={post.coverImage} 
+                        alt={post.title} 
+                        width={96} 
+                        height={96} 
+                        className="w-full h-full object-cover" 
+                      />
                     )}
                   </div>
                   
