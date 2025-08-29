@@ -3,6 +3,13 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import TiptapContent from '@/components/article/tiptap-content'
+import { IBM_Plex_Sans_Arabic } from "next/font/google"
+
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+})
 
 interface ApiResponse<T = any> {
   success: boolean
@@ -36,7 +43,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const publishedAt = post.publishedAt ? new Date(post.publishedAt) : null
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className={`${ibmPlexArabic.className} min-h-screen bg-gray-50 dark:bg-gray-900`}>
       <div className="container mx-auto px-4 py-10">
         <div className="max-w-3xl mx-auto">
           <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
@@ -68,13 +75,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             {post.content && typeof post.content === 'object' && post.content.html ? (
               // إذا كان المحتوى يحتوي على HTML مباشر
               <div 
-                className="tiptap-content prose prose-lg max-w-none dark:prose-invert
-                  prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100
-                  prose-p:text-gray-800 dark:prose-p:text-gray-200 prose-p:leading-relaxed prose-p:mb-4
-                  prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline
-                  prose-strong:text-gray-900 dark:prose-strong:text-gray-100
-                  prose-blockquote:border-r-4 prose-blockquote:border-purple-500 prose-blockquote:pr-4
-                  prose-ul:pr-6 prose-ol:pr-6"
+                className="tiptap-content"
                 dangerouslySetInnerHTML={{ __html: post.content.html }}
               />
             ) : post.content && typeof post.content === 'object' && post.content.type ? (
