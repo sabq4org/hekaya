@@ -2,19 +2,20 @@
 
 import { useEffect, useState } from 'react'
 import { generateHTML } from '@tiptap/html'
+import { JSONContent } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import Image from '@tiptap/extension-image'
-import Link from '@tiptap/extension-link'
-import Table from '@tiptap/extension-table'
-import TableRow from '@tiptap/extension-table-row'
-import TableHeader from '@tiptap/extension-table-header'
-import TableCell from '@tiptap/extension-table-cell'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import Color from '@tiptap/extension-color'
-import TextStyle from '@tiptap/extension-text-style'
-import Highlight from '@tiptap/extension-highlight'
-import Underline from '@tiptap/extension-underline'
-import TextAlign from '@tiptap/extension-text-align'
+import { Image } from '@tiptap/extension-image'
+import { Link } from '@tiptap/extension-link'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
+import { Color } from '@tiptap/extension-color'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Highlight } from '@tiptap/extension-highlight'
+import { Underline } from '@tiptap/extension-underline'
+import { TextAlign } from '@tiptap/extension-text-align'
 import { createLowlight } from 'lowlight'
 import javascript from 'highlight.js/lib/languages/javascript'
 import typescript from 'highlight.js/lib/languages/typescript'
@@ -26,7 +27,7 @@ const lowlight = createLowlight()
 lowlight.register({ javascript, typescript, html, css, python })
 
 interface TiptapContentProps {
-  content: any
+  content: JSONContent | string | null
   className?: string
 }
 
@@ -59,13 +60,24 @@ export default function TiptapContent({ content, className = '' }: TiptapContent
           }),
         ]
 
-        const generatedHtml = generateHTML(content, extensions)
+        let generatedHtml = ''
+        
+        if (typeof content === 'string') {
+          // If content is a string, assume it's HTML
+          generatedHtml = content
+        } else {
+          // If content is JSONContent object, generate HTML from it
+          generatedHtml = generateHTML(content as JSONContent, extensions)
+        }
+        
         setHtml(generatedHtml)
       } catch (error) {
         console.error('Error generating HTML:', error)
-        // Fallback to displaying raw text if available
-        if (content.content) {
-          setHtml(`<div>${content.content}</div>`)
+        // Fallback to displaying raw content
+        if (typeof content === 'string') {
+          setHtml(content)
+        } else if (content && typeof content === 'object' && 'content' in content) {
+          setHtml(`<div>${String(content.content)}</div>`)
         }
       } finally {
         setIsLoading(false)
