@@ -32,35 +32,58 @@ interface TiptapContentProps {
 
 export default function TiptapContent({ content, className = '' }: TiptapContentProps) {
   const [html, setHtml] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (content) {
-      const extensions = [
-        StarterKit.configure({
-          codeBlock: false,
-        }),
-        Image,
-        Link,
-        Table,
-        TableRow,
-        TableHeader,
-        TableCell,
-        CodeBlockLowlight.configure({
-          lowlight,
-        }),
-        Color.configure({ types: [TextStyle.name] }),
-        TextStyle,
-        Highlight,
-        Underline,
-        TextAlign.configure({
-          types: ['heading', 'paragraph'],
-        }),
-      ]
+      try {
+        const extensions = [
+          StarterKit.configure({
+            codeBlock: false,
+          }),
+          Image,
+          Link,
+          Table,
+          TableRow,
+          TableHeader,
+          TableCell,
+          CodeBlockLowlight.configure({
+            lowlight,
+          }),
+          Color.configure({ types: [TextStyle.name] }),
+          TextStyle,
+          Highlight,
+          Underline,
+          TextAlign.configure({
+            types: ['heading', 'paragraph'],
+          }),
+        ]
 
-      const generatedHtml = generateHTML(content, extensions)
-      setHtml(generatedHtml)
+        const generatedHtml = generateHTML(content, extensions)
+        setHtml(generatedHtml)
+      } catch (error) {
+        console.error('Error generating HTML:', error)
+        // Fallback to displaying raw text if available
+        if (content.content) {
+          setHtml(`<div>${content.content}</div>`)
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    } else {
+      setIsLoading(false)
     }
   }, [content])
+
+  if (isLoading) {
+    return (
+      <div className="animate-pulse space-y-4">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+      </div>
+    )
+  }
 
   return (
     <div 

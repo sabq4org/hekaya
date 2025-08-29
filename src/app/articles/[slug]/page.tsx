@@ -65,9 +65,23 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
           {/* Article Content */}
           <article className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-sm">
-            {post.content && typeof post.content === 'object' ? (
+            {post.content && typeof post.content === 'object' && post.content.html ? (
+              // إذا كان المحتوى يحتوي على HTML مباشر
+              <div 
+                className="tiptap-content prose prose-lg max-w-none dark:prose-invert
+                  prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100
+                  prose-p:text-gray-800 dark:prose-p:text-gray-200 prose-p:leading-relaxed prose-p:mb-4
+                  prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline
+                  prose-strong:text-gray-900 dark:prose-strong:text-gray-100
+                  prose-blockquote:border-r-4 prose-blockquote:border-purple-500 prose-blockquote:pr-4
+                  prose-ul:pr-6 prose-ol:pr-6"
+                dangerouslySetInnerHTML={{ __html: post.content.html }}
+              />
+            ) : post.content && typeof post.content === 'object' && post.content.type ? (
+              // إذا كان المحتوى بتنسيق Tiptap JSON
               <TiptapContent content={post.content} />
             ) : (
+              // إذا كان المحتوى نص عادي
               <div className="prose prose-lg max-w-none dark:prose-invert">
                 <p className="text-gray-800 dark:text-gray-200">{post.contentText || post.content}</p>
               </div>
