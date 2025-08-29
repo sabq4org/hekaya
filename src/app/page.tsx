@@ -28,6 +28,8 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
 export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [currentText, setCurrentText] = useState(0)
+  const [articles, setArticles] = useState([])
+  const [loading, setLoading] = useState(true)
   
   const rotatingTexts = [
     "تعلم الآلة",
@@ -42,8 +44,26 @@ export default function Home() {
     const interval = setInterval(() => {
       setCurrentText((prev) => (prev + 1) % rotatingTexts.length)
     }, 3000)
+    
+    // جلب أحدث المقالات
+    fetchLatestArticles()
+    
     return () => clearInterval(interval)
   }, [rotatingTexts.length])
+  
+  const fetchLatestArticles = async () => {
+    try {
+      const response = await fetch('/api/posts?published=true&limit=3')
+      const data = await response.json()
+      if (data.success && data.data) {
+        setArticles(data.data)
+      }
+    } catch (error) {
+      console.error('خطأ في جلب المقالات:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const features = [
     {
@@ -63,35 +83,18 @@ export default function Home() {
     }
   ]
 
-  const latestArticles = [
-    {
-      title: "الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر",
-      description: "اكتشف كيف يحدث الذكاء الاصطناعي ثورة في التشخيص الطبي، من الكشف المبكر عن السرطان إلى تشخيص أمراض العيون بدقة تفوق 97%.",
-      author: "د. سارة الأحمد",
-      date: "28 أغسطس 2024",
-      readingTime: 8,
-      icon: <Cpu className="w-6 h-6" />,
-      slug: "ai-medical-diagnosis"
-    },
-    {
-      title: "مستقبل التعلم الآلي في الصناعات الحديثة",
-      description: "رحلة استكشافية في عالم التعلم الآلي وتطبيقاته المستقبلية في مختلف الصناعات من الطب إلى الفضاء.",
-      author: "م. أحمد محمد",
-      date: "15 أغسطس 2024",
-      readingTime: 7,
-      icon: <Binary className="w-6 h-6" />,
-      slug: "future-of-ai-in-education"
-    },
-    {
-      title: "أخلاقيات الذكاء الاصطناعي في العصر الرقمي",
-      description: "نقاش معمق حول التحديات الأخلاقية التي يطرحها تطور الذكاء الاصطناعي وكيفية وضع أطر تنظيمية فعالة.",
-      author: "د. فاطمة الزهراء",
-      date: "10 أغسطس 2024",
-      readingTime: 6,
-      icon: <Code className="w-6 h-6" />,
-      slug: "ai-ethics"
+  // أيقونات للمقالات حسب القسم
+  const getSectionIcon = (sectionSlug) => {
+    const icons = {
+      'artificial-intelligence': <Brain className="w-8 h-8" />,
+      'machine-learning': <Cpu className="w-8 h-8" />,
+      'tech-news': <Rocket className="w-8 h-8" />,
+      'data-science': <Binary className="w-8 h-8" />,
+      'programming': <Code className="w-8 h-8" />,
+      'default': <Lightbulb className="w-8 h-8" />
     }
-  ]
+    return icons[sectionSlug] || icons.default
+  }
 
   return (
     <div className={`min-h-screen relative overflow-hidden ${ibmPlexArabic.className} bg-[#f8f8f7] dark:bg-[#1a1a1a]`}>
@@ -162,8 +165,17 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {latestArticles.map((article, index) => (
-            <Link href={`/articles/${article.slug}`} key={index}>
+          {loading ? (
+            <div className="col-span-3 text-center py-8">
+              <p className="text-gray-500">جاري تحميل المقالات...</p>
+            </div>
+          ) : articles.length === 0 ? (
+            <div className="col-span-3 text-center py-8">
+              <p className="text-gray-500">لا توجد مقالات منشورة حالياً</p>
+            </div>
+          ) : (
+            articles.map((article) => (
+              <Link href={`/articles/${article.slug}`} key={article.id}>
                               <Card 
                 className="group transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col h-full bg-white dark:bg-gray-800 dark:border-gray-700"
                 style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
@@ -171,14 +183,14 @@ export default function Home() {
                 <CardHeader className="p-6 pb-4">
                   <div className="flex items-start gap-3 mb-4">
                     <div className="p-3 text-purple-600 dark:text-purple-400 shrink-0 bg-gray-100 dark:bg-gray-700" style={{ borderRadius: '8px' }}>
-                      {article.icon}
+                      {getSectionIcon(article.section?.slug)}
                     </div>
                     <CardTitle className="text-xl group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-2 dark:text-gray-100">
                       {article.title}
                     </CardTitle>
                   </div>
                   <CardDescription className="text-gray-600 dark:text-gray-400 line-clamp-5 text-base leading-relaxed">
-                    {article.description}
+                    {article.summary || article.contentText?.substring(0, 200) + '...'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="mt-auto pt-0 px-6 pb-6">
@@ -186,11 +198,11 @@ export default function Home() {
                   <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400 dark:border-gray-700" style={{ borderTop: '1px solid #f0f0ef', paddingTop: '12px' }}>
                     <div className="flex items-center gap-1">
                       <User className="w-4 h-4" />
-                      <span>{article.author}</span>
+                      <span>{article.author?.name || 'غير معروف'}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      <span>{article.date}</span>
+                      <span>{new Date(article.publishedAt).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
@@ -199,8 +211,9 @@ export default function Home() {
                   </div>
                 </CardContent>
               </Card>
-            </Link>
-          ))}
+              </Link>
+            ))
+          )}
         </div>
       </section>
 
