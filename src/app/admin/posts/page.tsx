@@ -76,11 +76,16 @@ export default function PostsPage() {
     try {
       const response = await fetch('/api/posts')
       const data = await response.json()
-      if (data.success) {
-        setPosts(data.data.posts || [])
+      if (data.success && data.data) {
+        // API returns posts array directly in data.data
+        setPosts(data.data)
+      } else {
+        console.error('فشل جلب المقالات:', data.error)
+        setPosts([])
       }
     } catch (error) {
       console.error('خطأ في جلب المقالات:', error)
+      setPosts([])
     } finally {
       setLoading(false)
     }
