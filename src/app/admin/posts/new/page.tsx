@@ -127,13 +127,8 @@ export default function NewPost() {
         throw new Error(json?.error || 'تعذر حفظ المقال')
       }
 
-      const created = json.data
-      // التوجيه بعد الإنشاء
-      if (payload.status === 'PUBLISHED') {
-        router.push(`/articles/${created.slug}`)
-      } else {
-        router.push('/admin/posts')
-      }
+      // التوجيه بعد الإنشاء: العودة دائماً لقائمة المقالات في لوحة التحكم
+      router.push('/admin/posts')
     } catch (error) {
       console.error(error)
       alert((error as Error).message || 'حدث خطأ غير متوقع أثناء الحفظ')
