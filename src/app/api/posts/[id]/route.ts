@@ -3,10 +3,13 @@ import { prisma } from '@/lib/prisma'
 import {
   withErrorHandling,
   successResponse,
+  requireAuth,
+  ApiErrors,
   createSlug,
   logApiAction,
 } from '@/lib/api-helpers'
 import { Permission, canEditPost, canDeletePost } from '@/lib/permissions'
+import { Role, PostStatus } from '@prisma/client'
 
 // GET /api/posts/[id] - الحصول على مقال واحد
 export const GET = withErrorHandling(async (
@@ -86,7 +89,6 @@ export const GET = withErrorHandling(async (
           comments: {
             where: { status: 'APPROVED' }
           },
-          likes: true,
         },
       },
     },
@@ -99,7 +101,7 @@ export const GET = withErrorHandling(async (
   // التحقق من الصلاحيات للمقالات غير المنشورة
   if (post.status !== PostStatus.PUBLISHED) {
     try {
-      await await requireAuth(request)
+      const user = await requireAuth(request)
       
       // المدير والمحرر يمكنهما رؤية أي مقال
       // الكاتب يمكنه رؤية مقالاته فقط
@@ -125,7 +127,7 @@ export const GET = withErrorHandling(async (
     ...post,
     tags: post.tags.map(pt => pt.tag),
     commentsCount: post._count.comments,
-    likesCount: post._count.likes,
+    likesCount: post.likes,
     _count: undefined,
   }
   

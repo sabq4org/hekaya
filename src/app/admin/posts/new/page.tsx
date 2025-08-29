@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import TiptapEditor from '@/components/editor/tiptap-editor'
@@ -27,17 +28,22 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
 })
 
 export default function NewPost() {
+  const router = useRouter()
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [excerpt, setExcerpt] = useState('')
   const [content, setContent] = useState('')
   const [category, setCategory] = useState('')
-  const [tags, setTags] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [featuredImage, setFeaturedImage] = useState('')
   const [status, setStatus] = useState('draft')
   const [publishDate, setPublishDate] = useState('')
   const [metaTitle, setMetaTitle] = useState('')
   const [metaDescription, setMetaDescription] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [sections, setSections] = useState<any[]>([])
+  const [allTags, setAllTags] = useState<any[]>([])
+  const [loadingOpts, setLoadingOpts] = useState(true)
 
   // Auto-generate slug from title
   const handleTitleChange = (value: string) => {
@@ -52,22 +58,91 @@ export default function NewPost() {
     }
   }
 
-  const handleSave = (saveStatus: string) => {
-    const postData = {
-      title,
-      slug,
-      excerpt,
-      content,
-      category,
-      tags,
-      featuredImage,
-      status: saveStatus,
-      publishDate,
-      metaTitle,
-      metaDescription
+  useEffect(() => {
+    let canceled = false
+    async function loadOptions() {
+      try {
+        setLoadingOpts(true)
+        const [secRes, tagRes] = await Promise.all([
+          fetch('/api/sections?includeStats=false&limit=100'),
+          fetch('/api/tags?limit=100&popular=true')
+        ])
+        const secJson = await secRes.json()
+        const tagJson = await tagRes.json()
+        if (!canceled) {
+          setSections(Array.isArray(secJson.data) ? secJson.data : [])
+          setAllTags(Array.isArray(tagJson.data) ? tagJson.data : [])
+        }
+      } catch (e) {
+        if (!canceled) {
+          setSections([])
+          setAllTags([])
+        }
+      } finally {
+        if (!canceled) setLoadingOpts(false)
+      }
     }
-    console.log('Saving post:', postData)
-    // TODO: Implement save functionality
+    loadOptions()
+    return () => { canceled = true }
+  }, [])
+
+  const handleSave = async (saveStatus: string) => {
+    if (isSaving) return
+    setIsSaving(true)
+    try {
+      const plainText = content
+        .replace(/<[^>]*>/g, ' ') // إزالة الوسوم
+        .replace(/\s+/g, ' ') // توحيد المسافات
+        .trim()
+
+      const statusMap: Record<string, string> = {
+        draft: 'DRAFT',
+        published: 'PUBLISHED',
+        scheduled: 'SCHEDULED',
+      }
+
+      const payload: Record<string, any> = {
+        title,
+        slug: slug || undefined,
+        summary: excerpt || undefined,
+        content: { html: content },
+        contentText: plainText,
+        status: statusMap[saveStatus] || 'DRAFT',
+        coverImage: featuredImage || undefined,
+        metaTitle: metaTitle || undefined,
+        metaDescription: metaDescription || undefined,
+        sectionId: category || undefined,
+        tagIds: tags.length ? tags : undefined,
+      }
+
+      if (payload.status === 'SCHEDULED' && publishDate) {
+        payload.scheduledFor = publishDate
+      }
+
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      const json = await res.json()
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error || 'تعذر حفظ المقال')
+      }
+
+      const created = json.data
+      // التوجيه بعد الإنشاء
+      if (payload.status === 'PUBLISHED') {
+        router.push(`/articles/${created.slug}`)
+      } else {
+        router.push('/admin/posts')
+      }
+    } catch (error) {
+      console.error(error)
+      alert((error as Error).message || 'حدث خطأ غير متوقع أثناء الحفظ')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -97,6 +172,7 @@ export default function NewPost() {
               className="gap-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-600"
               style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
               onClick={() => handleSave('draft')}
+              disabled={isSaving}
             >
               <Save className="w-4 h-4" />
               حفظ كمسودة
@@ -113,6 +189,7 @@ export default function NewPost() {
               className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
               style={{ borderRadius: '8px', boxShadow: 'none' }}
               onClick={() => handleSave('published')}
+              disabled={isSaving}
             >
               <Send className="w-4 h-4" />
               نشر
@@ -299,26 +376,34 @@ export default function NewPost() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
                   style={{ border: '1px solid #f0f0ef' }}
+                  disabled={loadingOpts}
                 >
-                  <option value="">اختر تصنيفاً</option>
-                  <option value="ai-medicine">الطب والصحة</option>
-                  <option value="ai-education">التعليم</option>
-                  <option value="ai-technology">التقنية</option>
-                  <option value="ai-industry">الصناعة</option>
-                  <option value="ai-business">الأعمال</option>
+                  <option value="">{loadingOpts ? 'جارِ التحميل...' : 'اختر تصنيفاً'}</option>
+                  {sections.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2 dark:text-gray-300">الوسوم</label>
-                <input
-                  type="text"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
-                  style={{ border: '1px solid #f0f0ef' }}
-                  placeholder="وسوم مفصولة بفاصلة"
-                />
+                <div className="flex flex-wrap gap-2">
+                  {allTags.map((t) => {
+                    const active = tags.includes(t.id)
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => {
+                          setTags((prev) => active ? prev.filter(id => id !== t.id) : [...prev, t.id])
+                        }}
+                        className={`px-3 py-1 text-sm rounded-full border ${active ? 'bg-purple-600 text-white border-purple-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700'}`}
+                      >
+                        {t.name}
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </CardContent>
           </Card>

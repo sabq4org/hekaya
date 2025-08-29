@@ -1,22 +1,13 @@
 'use client'
 
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { 
   Calendar, 
   Clock, 
   User, 
-  Cpu,
-  Binary,
-  Code,
-  Brain,
-  Sparkles,
-  BookOpen,
-  Lightbulb,
-  Rocket,
-  Database,
-  Globe,
-  Shield
+  Sparkles
 } from "lucide-react"
 import { IBM_Plex_Sans_Arabic } from "next/font/google"
 
@@ -27,68 +18,32 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
 })
 
 export default function BlogPage() {
-  const articles = [
-    {
-      title: "الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر",
-      description: "اكتشف كيف يحدث الذكاء الاصطناعي ثورة في التشخيص الطبي، من الكشف المبكر عن السرطان إلى تشخيص أمراض العيون بدقة تفوق 97%.",
-      author: "د. سارة الأحمد",
-      date: "28 أغسطس 2024",
-      readingTime: 8,
-      slug: "ai-medical-diagnosis",
-      icon: <Cpu className="w-6 h-6" />,
-      category: "الطب والذكاء الاصطناعي"
-    },
-    {
-      title: "مستقبل التعلم الآلي في الصناعات الحديثة",
-      description: "رحلة استكشافية في عالم التعلم الآلي وتطبيقاته المستقبلية في مختلف الصناعات من الطب إلى الفضاء.",
-      author: "م. أحمد محمد",
-      date: "15 أغسطس 2024",
-      readingTime: 7,
-      slug: "future-of-ai-in-education",
-      icon: <Binary className="w-6 h-6" />,
-      category: "التعليم والتقنية"
-    },
-    {
-      title: "أخلاقيات الذكاء الاصطناعي في العصر الرقمي",
-      description: "نقاش معمق حول التحديات الأخلاقية التي يطرحها تطور الذكاء الاصطناعي وكيفية وضع أطر تنظيمية فعالة.",
-      author: "د. فاطمة الزهراء",
-      date: "10 أغسطس 2024",
-      readingTime: 6,
-      slug: "ai-ethics",
-      icon: <Code className="w-6 h-6" />,
-      category: "الأخلاقيات"
-    },
-    {
-      title: "الشبكات العصبية العميقة: فهم الأساسيات",
-      description: "دليل شامل لفهم كيفية عمل الشبكات العصبية العميقة وتطبيقاتها في مختلف المجالات التقنية.",
-      author: "د. محمد الخالد",
-      date: "5 أغسطس 2024",
-      readingTime: 10,
-      slug: "deep-neural-networks",
-      icon: <Brain className="w-6 h-6" />,
-      category: "تعلم الآلة"
-    },
-    {
-      title: "معالجة اللغة الطبيعية باللغة العربية",
-      description: "تحديات وحلول معالجة اللغة العربية باستخدام تقنيات الذكاء الاصطناعي الحديثة.",
-      author: "د. نورا السالم",
-      date: "1 أغسطس 2024",
-      readingTime: 9,
-      slug: "arabic-nlp",
-      icon: <BookOpen className="w-6 h-6" />,
-      category: "معالجة اللغة"
-    },
-    {
-      title: "الذكاء الاصطناعي في الأمن السيبراني",
-      description: "كيف يساهم الذكاء الاصطناعي في تعزيز الأمن الرقمي ومكافحة التهديدات السيبرانية.",
-      author: "م. خالد العمري",
-      date: "28 يوليو 2024",
-      readingTime: 7,
-      slug: "ai-cybersecurity",
-      icon: <Shield className="w-6 h-6" />,
-      category: "الأمن السيبراني"
+  const [articles, setArticles] = useState<any[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let canceled = false
+    async function load() {
+      try {
+        const res = await fetch('/api/posts?published=true&limit=12')
+        const json = await res.json()
+        if (!canceled && json?.success) {
+          setArticles(Array.isArray(json.data) ? json.data : [])
+          setTotal(json?.pagination?.total || (Array.isArray(json.data) ? json.data.length : 0))
+        }
+      } catch (e) {
+        if (!canceled) {
+          setArticles([])
+          setTotal(0)
+        }
+      } finally {
+        if (!canceled) setLoading(false)
+      }
     }
-  ]
+    load()
+    return () => { canceled = true }
+  }, [])
 
   return (
     <div className={`min-h-screen ${ibmPlexArabic.className} bg-[#f8f8f7] dark:bg-[#1a1a1a]`}>
@@ -109,8 +64,14 @@ export default function BlogPage() {
 
           {/* Articles Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {articles.map((article, index) => (
-              <Link href={`/articles/${article.slug}`} key={index}>
+            {loading && (
+              <div className="text-center text-gray-500 dark:text-gray-400">جارِ التحميل...</div>
+            )}
+            {!loading && articles.length === 0 && (
+              <div className="text-center text-gray-500 dark:text-gray-400">لا توجد مقالات منشورة بعد.</div>
+            )}
+            {!loading && articles.map((article: any) => (
+              <Link href={`/articles/${article.slug}`} key={article.id}>
                 <Card 
                   className="group transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col h-full bg-white dark:bg-gray-800 dark:border-gray-700"
                   style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}
@@ -118,11 +79,11 @@ export default function BlogPage() {
                   <CardHeader className="p-6 pb-4">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start gap-3 flex-1">
-                        <div className="p-3 text-purple-600 dark:text-purple-400 shrink-0 bg-gray-100 dark:bg-gray-700" style={{ borderRadius: '8px' }}>
-                          {article.icon}
-                        </div>
+                        <div className="p-3 text-purple-600 dark:text-purple-400 shrink-0 bg-gray-100 dark:bg-gray-700" style={{ borderRadius: '8px' }} />
                         <div className="flex-1">
-                          <div className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-2">{article.category}</div>
+                          {article.section?.name && (
+                            <div className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-2">{article.section.name}</div>
+                          )}
                           <CardTitle className="text-xl group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-2 dark:text-gray-100">
                             {article.title}
                           </CardTitle>
@@ -130,24 +91,30 @@ export default function BlogPage() {
                       </div>
                     </div>
                     <CardDescription className="text-gray-600 dark:text-gray-400 line-clamp-3 text-base leading-relaxed">
-                      {article.description}
+                      {article.summary || article.contentText?.slice(0, 140)}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="mt-auto pt-0 px-6 pb-6">
                     {/* Publication Info */}
                     <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400 dark:border-gray-700" style={{ borderTop: '1px solid #f0f0ef', paddingTop: '12px' }}>
-                      <div className="flex items-center gap-1">
-                        <User className="w-4 h-4" />
-                        <span>{article.author}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{article.date}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{article.readingTime} دقائق</span>
-                      </div>
+                      {article.author?.name && (
+                        <div className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          <span>{article.author.name}</span>
+                        </div>
+                      )}
+                      {article.publishedAt && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{new Date(article.publishedAt).toLocaleDateString('ar-SA')}</span>
+                        </div>
+                      )}
+                      {typeof article.readingTime === 'number' && (
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{article.readingTime} دقائق</span>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -157,7 +124,7 @@ export default function BlogPage() {
 
           {/* Load More Section */}
           <div className="text-center mt-12">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">عرض 6 من 24 مقال</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">عرض {articles.length} من {total} مقال</p>
             <button 
               className="px-6 py-3 transition-colors bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-700"
               style={{ 

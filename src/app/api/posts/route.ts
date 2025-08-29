@@ -7,7 +7,12 @@ import {
   parseFilters,
   createSlug,
   logApiAction,
+  requireAuth,
+  requirePermission,
+  ApiErrors,
 } from '@/lib/api-helpers'
+import { Permission } from '@/lib/permissions'
+import { Role, PostStatus } from '@prisma/client'
 
 // GET /api/posts - الحصول على قائمة المقالات
 export const GET = withErrorHandling(async (request: NextRequest) => {
@@ -71,7 +76,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   
   // التحقق من الصلاحيات
   try {
-    await await requireAuth(request)
+    const user = await requireAuth(request)
     
     // إذا لم يكن مدير أو محرر، يرى مقالاته فقط
     if (user.role === Role.AUTHOR) {
@@ -148,7 +153,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
 // POST /api/posts - إنشاء مقال جديد
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  await await requirePermission(request, Permission.CREATE_POST)
+  const user = await requirePermission(request, Permission.CREATE_POST)
   const data = await request.json()
   
   // التحقق من البيانات المطلوبة
@@ -256,7 +261,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 // PUT /api/posts/bulk - عمليات جماعية
 export const PUT = withErrorHandling(async (request: NextRequest) => {
-  await await requirePermission(request, Permission.UPDATE_POST)
+  const user = await requirePermission(request, Permission.UPDATE_POST)
   const { action, postIds, data } = await request.json()
   
   validateRequired({ action, postIds }, ['action', 'postIds'])
