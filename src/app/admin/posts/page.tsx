@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -35,73 +35,77 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   display: "swap",
 })
 
-// Mock data
-const posts = [
-  {
-    id: '1',
-    title: 'الذكاء الاصطناعي في التشخيص الطبي: ثورة في دقة الكشف المبكر',
-    slug: 'ai-medical-diagnosis',
-    author: 'د. سارة الأحمد',
-    category: 'الطب والصحة',
-    status: 'published',
-    publishedAt: '2024-08-28',
-    views: 1234,
-    comments: 23,
-    image: '/images/ai-medical.jpg'
-  },
-  {
-    id: '2',
-    title: 'مستقبل الذكاء الاصطناعي في التعليم',
-    slug: 'future-of-ai-in-education',
-    author: 'أحمد محمد',
-    category: 'التعليم',
-    status: 'draft',
-    publishedAt: null,
-    views: 0,
-    comments: 0,
-    image: '/images/ai-education.jpg'
-  },
-  {
-    id: '3',
-    title: 'أخلاقيات الذكاء الاصطناعي في العصر الرقمي',
-    slug: 'ai-ethics',
-    author: 'د. فاطمة الزهراء',
-    category: 'التقنية',
-    status: 'published',
-    publishedAt: '2024-01-10',
-    views: 2542,
-    comments: 45,
-    image: '/images/ai-ethics.jpg'
-  },
-  {
-    id: '4',
-    title: 'التعلم العميق وتطبيقاته في معالجة الصور',
-    slug: 'deep-learning-image-processing',
-    author: 'م. خالد العمري',
-    category: 'التقنية',
-    status: 'published',
-    publishedAt: '2024-01-05',
-    views: 1876,
-    comments: 31,
-    image: '/images/deep-learning.jpg'
-  },
-  {
-    id: '5',
-    title: 'الروبوتات الذكية في الصناعة',
-    slug: 'smart-robots-industry',
-    author: 'د. ليلى حسن',
-    category: 'الصناعة',
-    status: 'scheduled',
-    publishedAt: '2024-02-01',
-    views: 0,
-    comments: 0,
-    image: '/images/robots.jpg'
+interface Post {
+  id: string
+  title: string
+  slug: string
+  summary?: string
+  status: string
+  publishedAt: string | null
+  viewCount: number
+  likes: number
+  coverImage?: string
+  author: {
+    id: string
+    name: string
+    email: string
+    image?: string
   }
-]
+  section?: {
+    id: string
+    name: string
+    slug: string
+    color?: string
+  }
+  _count: {
+    comments: number
+  }
+}
 
 export default function PostsPage() {
+  const [posts, setPosts] = useState<Post[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+
+  useEffect(() => {
+    fetchPosts()
+  }, [])
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('/api/posts')
+      const data = await response.json()
+      if (data.success) {
+        setPosts(data.data.posts || [])
+      }
+    } catch (error) {
+      console.error('خطأ في جلب المقالات:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDelete = async (postId: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذا المقال؟')) return
+    
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: 'DELETE',
+      })
+      
+      if (response.ok) {
+        // إزالة المقال من القائمة المحلية
+        setPosts(posts.filter(p => p.id !== postId))
+        alert('تم حذف المقال بنجاح')
+      } else {
+        alert('فشل حذف المقال')
+      }
+    } catch (error) {
+      console.error('خطأ في حذف المقال:', error)
+      alert('حدث خطأ أثناء حذف المقال')
+    }
+  }
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -112,17 +116,17 @@ export default function PostsPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'published':
+      case 'PUBLISHED':
         return <span className="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
           <CheckCircle className="w-3 h-3" />
           منشور
         </span>
-      case 'draft':
+      case 'DRAFT':
         return <span className="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
           <Clock className="w-3 h-3" />
           مسودة
         </span>
-      case 'scheduled':
+      case 'SCHEDULED':
         return <span className="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
           <Calendar className="w-3 h-3" />
           مجدول
@@ -174,7 +178,7 @@ export default function PostsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">المقالات المنشورة</p>
-                <p className="text-2xl font-bold dark:text-gray-100">{posts.filter(p => p.status === 'published').length}</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{posts.filter(p => p.status === 'PUBLISHED').length}</p>
               </div>
               <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -188,7 +192,7 @@ export default function PostsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">المسودات</p>
-                <p className="text-2xl font-bold dark:text-gray-100">{posts.filter(p => p.status === 'draft').length}</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{posts.filter(p => p.status === 'DRAFT').length}</p>
               </div>
               <div className="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
                 <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
@@ -202,7 +206,7 @@ export default function PostsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">إجمالي المشاهدات</p>
-                <p className="text-2xl font-bold dark:text-gray-100">{posts.reduce((acc, p) => acc + p.views, 0).toLocaleString()}</p>
+                <p className="text-2xl font-bold dark:text-gray-100">{posts.reduce((acc, p) => acc + (p.viewCount || 0), 0).toLocaleString()}</p>
               </div>
               <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
                 <Eye className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -238,28 +242,28 @@ export default function PostsPage() {
                 الكل
               </Button>
               <Button
-                variant={filterStatus === 'published' ? 'default' : 'outline'}
+                variant={filterStatus === 'PUBLISHED' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFilterStatus('published')}
-                className={filterStatus === 'published' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
+                onClick={() => setFilterStatus('PUBLISHED')}
+                className={filterStatus === 'PUBLISHED' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
                 style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
               >
                 منشور
               </Button>
               <Button
-                variant={filterStatus === 'draft' ? 'default' : 'outline'}
+                variant={filterStatus === 'DRAFT' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFilterStatus('draft')}
-                className={filterStatus === 'draft' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
+                onClick={() => setFilterStatus('DRAFT')}
+                className={filterStatus === 'DRAFT' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
                 style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
               >
                 مسودة
               </Button>
               <Button
-                variant={filterStatus === 'scheduled' ? 'default' : 'outline'}
+                variant={filterStatus === 'SCHEDULED' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFilterStatus('scheduled')}
-                className={filterStatus === 'scheduled' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
+                onClick={() => setFilterStatus('SCHEDULED')}
+                className={filterStatus === 'SCHEDULED' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}
                 style={{ borderColor: '#f0f0ef', borderRadius: '8px', boxShadow: 'none' }}
               >
                 مجدول
@@ -272,14 +276,23 @@ export default function PostsPage() {
       {/* Posts List */}
       <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
         <CardContent className="p-0">
+          {loading ? (
+            <div className="p-8 text-center">
+              <p className="text-gray-500">جاري تحميل المقالات...</p>
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-gray-500">لا توجد مقالات</p>
+            </div>
+          ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredPosts.map((post) => (
               <div key={post.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 <div className="flex items-start gap-4">
                   {/* Thumbnail */}
                   <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-lg shrink-0 overflow-hidden">
-                    {post.image && (
-                      <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                    {post.coverImage && (
+                      <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
                     )}
                   </div>
                   
@@ -299,27 +312,29 @@ export default function PostsPage() {
                         <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center gap-1">
                             <User className="w-4 h-4" />
-                            {post.author}
+                            {post.author?.name || 'غير معروف'}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Tag className="w-4 h-4" />
-                            {post.category}
-                          </span>
+                          {post.section && (
+                            <span className="flex items-center gap-1">
+                              <Tag className="w-4 h-4" />
+                              {post.section.name}
+                            </span>
+                          )}
                           {post.publishedAt && (
                             <span className="flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
                               {new Date(post.publishedAt).toLocaleDateString('ar-SA')}
                             </span>
                           )}
-                          {post.status === 'published' && (
+                          {post.status === 'PUBLISHED' && (
                             <>
                               <span className="flex items-center gap-1">
                                 <Eye className="w-4 h-4" />
-                                {post.views.toLocaleString()}
+                                {(post.viewCount || 0).toLocaleString()}
                               </span>
                               <span className="flex items-center gap-1">
                                 <MessageSquare className="w-4 h-4" />
-                                {post.comments}
+                                {post._count?.comments || 0}
                               </span>
                             </>
                           )}
@@ -340,7 +355,7 @@ export default function PostsPage() {
                               تحرير
                             </Link>
                           </DropdownMenuItem>
-                          {post.status === 'published' && (
+                          {post.status === 'PUBLISHED' && (
                             <DropdownMenuItem asChild>
                               <Link href={`/articles/${post.slug}`} className="flex items-center gap-2">
                                 <Eye className="w-4 h-4" />
@@ -348,7 +363,10 @@ export default function PostsPage() {
                               </Link>
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuItem className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                          <DropdownMenuItem 
+                            className="flex items-center gap-2 text-red-600 dark:text-red-400"
+                            onClick={() => handleDelete(post.id)}
+                          >
                             <Trash2 className="w-4 h-4" />
                             حذف
                           </DropdownMenuItem>
@@ -360,6 +378,7 @@ export default function PostsPage() {
               </div>
             ))}
           </div>
+          )}
         </CardContent>
       </Card>
     </div>
