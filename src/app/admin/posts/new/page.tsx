@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,16 +10,13 @@ import {
   Eye, 
   Send, 
   ArrowLeft, 
-  Image as ImageIcon,
-  Calendar,
-  Tag,
   User,
   Globe,
-  FileText,
   Sparkles
 } from 'lucide-react'
 import Link from 'next/link'
 import { IBM_Plex_Sans_Arabic } from "next/font/google"
+import ImageUploader from '@/components/ui/image-uploader'
 
 const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
@@ -41,8 +38,8 @@ export default function NewPost() {
   const [metaTitle, setMetaTitle] = useState('')
   const [metaDescription, setMetaDescription] = useState('')
   const [isSaving, setIsSaving] = useState(false)
-  const [sections, setSections] = useState<any[]>([])
-  const [allTags, setAllTags] = useState<any[]>([])
+  const [sections, setSections] = useState<{id: string, name: string}[]>([])
+  const [allTags, setAllTags] = useState<{id: string, name: string}[]>([])
   const [loadingOpts, setLoadingOpts] = useState(true)
 
   // Auto-generate slug from title
@@ -73,7 +70,7 @@ export default function NewPost() {
           setSections(Array.isArray(secJson.data) ? secJson.data : [])
           setAllTags(Array.isArray(tagJson.data) ? tagJson.data : [])
         }
-      } catch (e) {
+      } catch {
         if (!canceled) {
           setSections([])
           setAllTags([])
@@ -101,7 +98,7 @@ export default function NewPost() {
         scheduled: 'SCHEDULED',
       }
 
-      const payload: Record<string, any> = {
+      const payload: Record<string, unknown> = {
         title,
         slug: slug || undefined,
         summary: excerpt || undefined,
@@ -417,11 +414,11 @@ export default function NewPost() {
               <CardTitle className="dark:text-gray-100">الصورة المميزة</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer" style={{ borderColor: '#f0f0ef' }}>
-                <ImageIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">اسحب الصورة هنا أو انقر للاختيار</p>
-                <p className="text-xs text-gray-500 dark:text-gray-500">PNG, JPG حتى 10MB</p>
-              </div>
+              <ImageUploader
+                onImageUploaded={(url) => setFeaturedImage(url)}
+                maxSizeMB={5}
+                className="w-full"
+              />
             </CardContent>
           </Card>
 
