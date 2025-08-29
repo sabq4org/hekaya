@@ -27,8 +27,9 @@ async function getPost(slug: string) {
   }
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug)
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const post = await getPost(slug)
   if (!post) return notFound()
 
   const publishedAt = post.publishedAt ? new Date(post.publishedAt) : null

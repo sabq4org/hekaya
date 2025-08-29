@@ -108,7 +108,7 @@ export default function Home() {
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                 مرحباً بك في حكاية AI
               </span>
-              <Sparkles className="w-8 h-8 lg:w-10 lg:h-10 text-purple-500 dark:text-purple-400 animate-pulse" />
+              <Sparkles className="w-8 h-8 lg:w-10 lg:h-10 text-yellow-500 dark:text-yellow-400 animate-pulse" />
             </h1>
           </div>
 
@@ -209,7 +209,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto text-center">
           <Card className="bg-white dark:bg-gray-800 dark:border-gray-700" style={{ border: '1px solid #f0f0ef', borderRadius: '12px', boxShadow: 'none' }}>
             <CardContent className="p-8">
-              <Lightbulb className="w-12 h-12 mx-auto mb-4 text-purple-500 dark:text-purple-400" />
+              <Lightbulb className="w-12 h-12 mx-auto mb-4 text-yellow-500 dark:text-yellow-400" />
               <h3 className="text-2xl font-bold mb-4 dark:text-gray-100">انضم إلى رحلة المعرفة</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 احصل على أحدث المقالات والأخبار في عالم الذكاء الاصطناعي

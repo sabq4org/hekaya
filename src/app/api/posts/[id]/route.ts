@@ -14,9 +14,9 @@ import { Role, PostStatus } from '@prisma/client'
 // GET /api/posts/[id] - الحصول على مقال واحد
 export const GET = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) => {
-  const postId = params.id
+  const { id: postId } = await context.params
   
   // البحث بالـ ID أو الـ slug
   const post = await prisma.post.findFirst({
@@ -140,11 +140,11 @@ export const GET = withErrorHandling(async (
 // PUT /api/posts/[id] - تحديث مقال
 export const PUT = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) => {
   await await requirePermission(request, Permission.UPDATE_POST)
   const data = await request.json()
-  const postId = params.id
+  const { id: postId } = await context.params
   
   // البحث عن المقال
   const existingPost = await prisma.post.findUnique({
@@ -300,10 +300,10 @@ export const PUT = withErrorHandling(async (
 // DELETE /api/posts/[id] - حذف مقال
 export const DELETE = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) => {
   await await requirePermission(request, Permission.DELETE_POST)
-  const postId = params.id
+  const { id: postId } = await context.params
   
   // البحث عن المقال
   const post = await prisma.post.findUnique({
@@ -349,11 +349,11 @@ export const DELETE = withErrorHandling(async (
 // PATCH /api/posts/[id] - عمليات خاصة على المقال
 export const PATCH = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) => {
   await await requireAuth(request)
   const { action, data } = await request.json()
-  const postId = params.id
+  const { id: postId } = await context.params
   
   validateRequired({ action }, ['action'])
   
