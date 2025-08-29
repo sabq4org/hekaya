@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
+import TiptapContent from '@/components/article/tiptap-content'
 
 interface ApiResponse<T = any> {
   success: boolean
@@ -33,10 +34,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   if (!post) return notFound()
 
   const publishedAt = post.publishedAt ? new Date(post.publishedAt) : null
-  const contentHtml = typeof post.content === 'object' && post.content?.html ? post.content.html : null
 
   return (
-    <div className="min-h-screen bg-[#f8f8f7] dark:bg-[#1a1a1a]">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-10">
         <div className="max-w-3xl mx-auto">
           <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
@@ -63,11 +63,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             </div>
           )}
 
-          <article className="prose prose-lg max-w-none dark:prose-invert">
-            {contentHtml ? (
-              <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
+          {/* Article Content */}
+          <article className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-sm">
+            {post.content && typeof post.content === 'object' ? (
+              <TiptapContent content={post.content} />
             ) : (
-              <p>{post.contentText}</p>
+              <div className="prose prose-lg max-w-none dark:prose-invert">
+                <p className="text-gray-800 dark:text-gray-200">{post.contentText || post.content}</p>
+              </div>
             )}
           </article>
         </div>

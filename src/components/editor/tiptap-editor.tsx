@@ -47,7 +47,8 @@ import {
   AlignRight,
   AlignJustify,
   Palette,
-  Highlighter
+  Highlighter,
+  Smile
 } from 'lucide-react'
 import { useCallback } from 'react'
 
@@ -113,7 +114,7 @@ export default function TiptapEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-lg max-w-none focus:outline-none min-h-[400px] p-4',
+        class: 'prose prose-lg max-w-none focus:outline-none min-h-[400px] p-4 prose-p:mb-4 prose-headings:mb-4 prose-ul:mb-4 prose-ol:mb-4 prose-blockquote:mb-4 prose-pre:mb-4 prose-table:mb-4',
         dir: 'rtl',
       },
     },
@@ -140,6 +141,18 @@ export default function TiptapEditor({
     }
 
     editor?.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+  }, [editor])
+
+  const addEmoji = useCallback(() => {
+    const emojis = ['😀', '😃', '😄', '😁', '😊', '😍', '🥰', '😘', '🤗', '🤩', '🤔', '😎', '🥳', '🎉', '✨', '💯', '❤️', '🔥', '⭐', '👍', '👏', '🙏', '💪', '🚀', '🎯', '💡', '📚', '✅', '❌', '⚡', '🌟', '🎨', '📝', '💻', '🤖', '🧠', '🌍', '🌙', '☀️', '🌈']
+    const emojiPicker = window.prompt('اختر إيموجي أو اكتب واحد:\n\n' + emojis.join(' '))
+    
+    if (emojiPicker) {
+      const emoji = emojis.includes(emojiPicker) ? emojiPicker : emojiPicker.trim()
+      if (emoji) {
+        editor?.chain().focus().insertContent(emoji).run()
+      }
+    }
   }, [editor])
 
   const addTable = useCallback(() => {
@@ -300,6 +313,18 @@ export default function TiptapEditor({
           </Button>
         </div>
 
+        {/* Emoji */}
+        <div className="flex gap-1 border-r border-gray-200 pr-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={addEmoji}
+            title="إضافة إيموجي"
+          >
+            <Smile className="h-4 w-4" />
+          </Button>
+        </div>
+
         {/* Colors & Highlight */}
         <div className="flex gap-1 border-r border-gray-200 pr-2">
           <Button
@@ -325,6 +350,14 @@ export default function TiptapEditor({
             title="أخضر"
           >
             <Palette className="h-4 w-4 text-green-500" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().setColor('#1f2937').run()}
+            title="أسود"
+          >
+            <Palette className="h-4 w-4 text-gray-800" />
           </Button>
           <Button
             variant={editor.isActive('highlight') ? 'default' : 'ghost'}
