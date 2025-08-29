@@ -114,7 +114,7 @@ export default function PostsPage() {
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.author.toLowerCase().includes(searchTerm.toLowerCase())
+                         post.author.name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === 'all' || post.status === filterStatus
     return matchesSearch && matchesStatus
   })
@@ -307,7 +307,7 @@ export default function PostsPage() {
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="text-lg font-semibold dark:text-gray-100">
-                            <Link href={`/admin/posts/${post.id}/edit`} className="hover:text-purple-600 dark:hover:text-purple-400">
+                            <Link href={`/admin/posts/${post.id}`} className="hover:text-purple-600 dark:hover:text-purple-400">
                               {post.title}
                             </Link>
                           </h3>
@@ -355,7 +355,7 @@ export default function PostsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <Link href={`/admin/posts/${post.id}/edit`} className="flex items-center gap-2">
+                            <Link href={`/admin/posts/${post.id}`} className="flex items-center gap-2">
                               <Edit className="w-4 h-4" />
                               تحرير
                             </Link>

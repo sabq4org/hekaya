@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import TiptapEditor from '@/components/editor/tiptap-editor'
@@ -12,7 +12,8 @@ import {
   ArrowLeft, 
   User,
   Globe,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react'
 import Link from 'next/link'
 import { IBM_Plex_Sans_Arabic } from "next/font/google"
@@ -24,8 +25,31 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   display: "swap",
 })
 
-export default function NewPost() {
+interface Post {
+  id: string
+  title: string
+  slug: string
+  summary?: string
+  content: string
+  status: string
+  coverImage?: string
+  metaTitle?: string
+  metaDescription?: string
+  sectionId?: string
+  tagIds?: string[]
+  scheduledFor?: string
+  publishedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export default function EditPost() {
   const router = useRouter()
+  const params = useParams()
+  const postId = params?.id as string
+
+  const [post, setPost] = useState<Post | null>(null)
+  const [loading, setLoading] = useState(true)
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [excerpt, setExcerpt] = useState('')
@@ -41,20 +65,57 @@ export default function NewPost() {
   const [sections, setSections] = useState<{id: string, name: string}[]>([])
   const [allTags, setAllTags] = useState<{id: string, name: string}[]>([])
   const [loadingOpts, setLoadingOpts] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Auto-generate slug from title
-  const handleTitleChange = (value: string) => {
-    setTitle(value)
-    if (!slug) {
-      const generatedSlug = value
-        .toLowerCase()
-        .replace(/[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-z0-9\s]/g, '')
-        .replace(/\s+/g, '-')
-        .trim()
-      setSlug(generatedSlug)
+  // Load post data
+  useEffect(() => {
+    if (!postId) {
+      setError('معرف المقال مفقود')
+      setLoading(false)
+      return
     }
-  }
 
+    const loadPost = async () => {
+      try {
+        const response = await fetch(`/api/posts/${postId}`)
+        const result = await response.json()
+        
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'فشل في تحميل المقال')
+        }
+
+        const postData = result.data
+        setPost(postData)
+        
+        // Fill form with existing data
+        setTitle(postData.title || '')
+        setSlug(postData.slug || '')
+        setExcerpt(postData.summary || '')
+        setContent(postData.content?.html || postData.content || '')
+        setCategory(postData.sectionId || '')
+        setTags(postData.tagIds || [])
+        setFeaturedImage(postData.coverImage || '')
+        setStatus(postData.status?.toLowerCase() || 'draft')
+        setMetaTitle(postData.metaTitle || '')
+        setMetaDescription(postData.metaDescription || '')
+        
+        if (postData.scheduledFor) {
+          const date = new Date(postData.scheduledFor)
+          setPublishDate(date.toISOString().slice(0, 16))
+        }
+
+      } catch (err) {
+        console.error('Error loading post:', err)
+        setError((err as Error).message || 'حدث خطأ أثناء تحميل المقال')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadPost()
+  }, [postId])
+
+  // Load options (sections and tags)
   useEffect(() => {
     let canceled = false
     async function loadOptions() {
@@ -83,8 +144,21 @@ export default function NewPost() {
     return () => { canceled = true }
   }, [])
 
+  // Auto-generate slug from title (only if slug is empty)
+  const handleTitleChange = (value: string) => {
+    setTitle(value)
+    if (!slug) {
+      const generatedSlug = value
+        .toLowerCase()
+        .replace(/[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-z0-9\s]/g, '')
+        .replace(/\s+/g, '-')
+        .trim()
+      setSlug(generatedSlug)
+    }
+  }
+
   const handleSave = async (saveStatus: string) => {
-    if (isSaving) return
+    if (isSaving || !post) return
     setIsSaving(true)
     try {
       const plainText = content
@@ -116,8 +190,8 @@ export default function NewPost() {
         payload.scheduledFor = publishDate
       }
 
-      const res = await fetch('/api/posts', {
-        method: 'POST',
+      const res = await fetch(`/api/posts/${postId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
@@ -127,10 +201,10 @@ export default function NewPost() {
         throw new Error(json?.error || 'تعذر حفظ المقال')
       }
 
-      const created = json.data
-      // التوجيه بعد الإنشاء
+      const updatedPost = json.data
+      // التوجيه بعد التحديث
       if (payload.status === 'PUBLISHED') {
-        router.push(`/articles/${created.slug}`)
+        router.push(`/articles/${updatedPost.slug}`)
       } else {
         router.push('/admin/posts')
       }
@@ -140,6 +214,39 @@ export default function NewPost() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className={`${ibmPlexArabic.className} bg-[#f8f8f7] dark:bg-[#1a1a1a] min-h-screen`}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400">جاري تحميل المقال...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error || !post) {
+    return (
+      <div className={`${ibmPlexArabic.className} bg-[#f8f8f7] dark:bg-[#1a1a1a] min-h-screen`}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">خطأ في تحميل المقال</h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {error || 'المقال غير موجود أو تم حذفه'}
+            </p>
+            <Link href="/admin/posts">
+              <Button variant="outline">العودة إلى قائمة المقالات</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -159,7 +266,7 @@ export default function NewPost() {
               </Button>
             </Link>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              مقال جديد
+              تحرير المقال
             </h1>
             <Sparkles className="w-7 h-7 text-yellow-500 dark:text-yellow-400 animate-pulse" />
           </div>
@@ -172,7 +279,7 @@ export default function NewPost() {
               disabled={isSaving}
             >
               <Save className="w-4 h-4" />
-              حفظ كمسودة
+              {isSaving ? 'جاري الحفظ...' : 'حفظ كمسودة'}
             </Button>
             <Button 
               variant="outline"
@@ -189,7 +296,7 @@ export default function NewPost() {
               disabled={isSaving}
             >
               <Send className="w-4 h-4" />
-              نشر
+              {isSaving ? 'جاري النشر...' : 'نشر التحديث'}
             </Button>
           </div>
         </div>
@@ -354,6 +461,16 @@ export default function NewPost() {
                   <span className="text-sm dark:text-gray-300">المدير</span>
                 </div>
               </div>
+
+              {/* Post Info */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                  تم الإنشاء: {new Date(post.createdAt).toLocaleDateString('ar-SA')}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  آخر تحديث: {new Date(post.updatedAt).toLocaleDateString('ar-SA')}
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -419,6 +536,11 @@ export default function NewPost() {
                 maxSizeMB={5}
                 className="w-full"
               />
+              {featuredImage && (
+                <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                  الصورة الحالية: {featuredImage.split('/').pop()}
+                </div>
+              )}
             </CardContent>
           </Card>
 

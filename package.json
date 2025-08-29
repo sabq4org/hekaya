@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "echo 'Install complete'"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -36,7 +36,6 @@
     "@tiptap/extension-text-align": "^3.3.0",
     "@tiptap/extension-text-style": "^3.3.0",
     "@tiptap/extension-underline": "^3.3.0",
-    "@tiptap/html": "^3.3.0",
     "@tiptap/pm": "^3.3.0",
     "@tiptap/react": "^3.3.0",
     "@tiptap/starter-kit": "^3.3.0",

@@ -61,6 +61,63 @@ export const mockTags = [
   }
 ]
 
+export const mockPosts = [
+  {
+    id: '1',
+    title: 'مقدمة في الذكاء الاصطناعي',
+    slug: 'introduction-to-ai',
+    summary: 'مقدمة شاملة عن الذكاء الاصطناعي وتطبيقاته المختلفة',
+    content: '<p>هذا مقال تجريبي عن الذكاء الاصطناعي...</p>',
+    contentText: 'هذا مقال تجريبي عن الذكاء الاصطناعي',
+    coverImage: null,
+    coverAlt: null,
+    status: 'PUBLISHED',
+    authorId: '1',
+    sectionId: '1',
+    tagIds: ['1', '2'],
+    views: 150,
+    likes: 25,
+    shares: 5,
+    readingTime: 5,
+    isFeatured: true,
+    isPinned: false,
+    allowComments: true,
+    metaTitle: 'مقدمة في الذكاء الاصطناعي',
+    metaDescription: 'مقدمة شاملة عن الذكاء الاصطناعي وتطبيقاته المختلفة',
+    ogImage: null,
+    publishedAt: '2024-01-15T10:00:00.000Z',
+    createdAt: '2024-01-15T09:00:00.000Z',
+    updatedAt: '2024-01-15T10:00:00.000Z',
+  },
+  {
+    id: '2',
+    title: 'تعلم الآلة للمبتدئين',
+    slug: 'machine-learning-for-beginners',
+    summary: 'دليل شامل لتعلم أساسيات تعلم الآلة',
+    content: '<p>هذا مقال تجريبي عن تعلم الآلة...</p>',
+    contentText: 'هذا مقال تجريبي عن تعلم الآلة',
+    coverImage: null,
+    coverAlt: null,
+    status: 'PUBLISHED',
+    authorId: '1',
+    sectionId: '2',
+    tagIds: ['1', '3'],
+    views: 89,
+    likes: 12,
+    shares: 3,
+    readingTime: 7,
+    isFeatured: false,
+    isPinned: false,
+    allowComments: true,
+    metaTitle: 'تعلم الآلة للمبتدئين',
+    metaDescription: 'دليل شامل لتعلم أساسيات تعلم الآلة',
+    ogImage: null,
+    publishedAt: '2024-01-14T14:30:00.000Z',
+    createdAt: '2024-01-14T13:00:00.000Z',
+    updatedAt: '2024-01-14T14:30:00.000Z',
+  }
+]
+
 export const mockUsers = [
   {
     id: '1',
@@ -69,3 +126,9 @@ export const mockUsers = [
     role: 'ADMIN'
   }
 ]
+
+// Aliases for easier importing
+export const sections = mockSections
+export const tags = mockTags
+export const posts = mockPosts
+export const users = mockUsers
