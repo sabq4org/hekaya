@@ -202,6 +202,33 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     ? data.authorId
     : dbUser.id
 
+  // التحقق من وجود القسم أو إنشاء قسم افتراضي
+  let resolvedSectionId = data.sectionId
+  if (resolvedSectionId) {
+    const sectionExists = await prisma.section.findUnique({
+      where: { id: resolvedSectionId }
+    })
+    if (!sectionExists) {
+      console.warn(`القسم ${resolvedSectionId} غير موجود، سيتم استخدام القسم الافتراضي`)
+      resolvedSectionId = null
+    }
+  }
+  
+  // إذا لم يكن هناك قسم صالح، استخدم أو أنشئ قسم افتراضي
+  if (!resolvedSectionId) {
+    const defaultSection = await prisma.section.upsert({
+      where: { slug: 'general' },
+      update: {},
+      create: {
+        name: 'عام',
+        slug: 'general',
+        description: 'مقالات عامة',
+        color: '#6B7280'
+      }
+    })
+    resolvedSectionId = defaultSection.id
+  }
+
   // إعداد البيانات للإنشاء
   const postData: Record<string, unknown> = {
     title: data.title,
@@ -214,7 +241,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     coverAlt: data.coverAlt,
     readingTime: data.readingTime || 0,
     authorId: resolvedAuthorId,
-    sectionId: data.sectionId,
+    sectionId: resolvedSectionId,
     scheduledFor: data.scheduledFor ? new Date(data.scheduledFor) : null,
     metaTitle: data.metaTitle,
     metaDescription: data.metaDescription,
