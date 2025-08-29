@@ -126,6 +126,20 @@
   @apply mb-0;
 }
 
+/* Fix highlight/mark colors */
+.tiptap-content mark,
+.tiptap-content .bg-yellow-200,
+.tiptap-content .bg-yellow-100 {
+  @apply bg-purple-100 dark:bg-purple-900/30 text-gray-900 dark:text-gray-100;
+}
+
+/* Override any yellow highlight */
+.ProseMirror mark,
+.ProseMirror .bg-yellow-200,
+.ProseMirror .bg-yellow-100 {
+  @apply bg-purple-100 dark:bg-purple-900/30;
+}
+
 :root {
   --background: 249 250 251;
   --foreground: 17 24 39;

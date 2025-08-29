@@ -97,7 +97,7 @@ export default function TiptapEditor({
       TextStyle,
       Highlight.configure({
         HTMLAttributes: {
-          class: 'bg-yellow-200',
+          class: 'bg-purple-100 dark:bg-purple-900/30',
         },
       }),
       Underline,
