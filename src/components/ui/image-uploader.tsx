@@ -156,6 +156,13 @@ export default function ImageUploader({
               width={800}
               height={400}
               className="w-full h-auto max-h-[400px] object-cover"
+              onError={() => {
+                console.error('فشل في تحميل الصورة:', uploadedImage)
+                setError('فشل في تحميل الصورة. جرب رفع صورة جديدة.')
+                setUploadedImage(null)
+              }}
+              priority
+              unoptimized={true}
             />
             
             {/* أزرار التحكم */}

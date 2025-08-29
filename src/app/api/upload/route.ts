@@ -3,6 +3,15 @@ import { put } from '@vercel/blob'
 
 export async function POST(request: NextRequest) {
   try {
+    // التحقق من وجود TOKEN
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error('BLOB_READ_WRITE_TOKEN غير موجود في متغيرات البيئة')
+      return NextResponse.json(
+        { success: false, error: 'إعدادات الرفع غير صحيحة' },
+        { status: 500 }
+      )
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File
     
@@ -14,9 +23,10 @@ export async function POST(request: NextRequest) {
     }
 
     // التحقق من نوع الملف
-    if (!file.type.startsWith('image/')) {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { success: false, error: 'يجب أن يكون الملف صورة' },
+        { success: false, error: 'نوع الملف غير مدعوم. يُسمح بـ: JPEG, PNG, GIF, WebP' },
         { status: 400 }
       )
     }
@@ -29,11 +39,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log(`رفع صورة: ${file.name}, الحجم: ${file.size} bytes, النوع: ${file.type}`)
+
+    // إنشاء اسم فريد للملف
+    const timestamp = Date.now()
+    const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+
     // رفع الصورة إلى Vercel Blob
-    const { url, pathname } = await put(`images/${file.name}`, file, {
+    const { url, pathname } = await put(`images/${fileName}`, file, {
       access: 'public',
-      addRandomSuffix: true,
+      addRandomSuffix: false, // لأننا أضفنا timestamp بالفعل
     })
+
+    console.log(`تم رفع الصورة بنجاح: ${url}`)
 
     return NextResponse.json({
       success: true,
@@ -50,7 +68,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('خطأ في رفع الصورة:', error)
     return NextResponse.json(
-      { success: false, error: 'حدث خطأ أثناء رفع الصورة' },
+      { success: false, error: 'حدث خطأ أثناء رفع الصورة: ' + (error as Error).message },
       { status: 500 }
     )
   }

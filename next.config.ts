@@ -8,7 +8,17 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['localhost', 'hekaya-ai.com']
+    domains: ['localhost', 'hekaya-ai.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.blob.vercel-storage.com',
+      }
+    ]
   },
   serverExternalPackages: ['@prisma/client']
 };
