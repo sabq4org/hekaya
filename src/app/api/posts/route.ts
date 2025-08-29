@@ -280,20 +280,32 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   })
   
   // ربط الوسوم إذا كانت موجودة
-  if (data.tagIds && Array.isArray(data.tagIds)) {
-    await prisma.postTag.createMany({
-      data: data.tagIds.map((tagId: string) => ({
-        postId: post.id,
-        tagId,
-      })),
-      skipDuplicates: true,
+  if (data.tagIds && Array.isArray(data.tagIds) && data.tagIds.length > 0) {
+    // التحقق من وجود الوسوم المرسلة
+    const existingTags = await prisma.tag.findMany({
+      where: { id: { in: data.tagIds } },
+      select: { id: true }
     })
     
-    // تحديث عداد استخدام الوسوم
-    await prisma.tag.updateMany({
-      where: { id: { in: data.tagIds } },
-      data: { usageCount: { increment: 1 } },
-    })
+    const validTagIds = existingTags.map(tag => tag.id)
+    
+    if (validTagIds.length > 0) {
+      await prisma.postTag.createMany({
+        data: validTagIds.map((tagId: string) => ({
+          postId: post.id,
+          tagId,
+        })),
+        skipDuplicates: true,
+      })
+      
+      // تحديث عداد استخدام الوسوم
+      await prisma.tag.updateMany({
+        where: { id: { in: validTagIds } },
+        data: { usageCount: { increment: 1 } },
+      })
+    } else {
+      console.warn('لم يتم العثور على أي وسوم صالحة من المعرفات المرسلة:', data.tagIds)
+    }
   }
   
   // تسجيل العملية
