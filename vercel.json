@@ -1,34 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
   "framework": "nextjs",
-  "rewrites": [
-    {
-      "source": "/rss.xml",
-      "destination": "/rss.xml"
-    },
-    {
-      "source": "/sitemap.xml", 
-      "destination": "/sitemap.xml"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        }
-      ]
-    }
-  ]
+  "buildCommand": "npm run build",
+  "installCommand": "npm install"
 }
